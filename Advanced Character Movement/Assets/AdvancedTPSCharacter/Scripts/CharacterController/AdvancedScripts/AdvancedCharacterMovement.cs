@@ -31,6 +31,8 @@ public class AdvancedCharacterMovement : MonoBehaviour
     bool crouching;
     bool jumping;
     bool jumpAnimationTriggered;
+    bool hasGroundedParameter;
+    bool hasVerticalVelocityParameter;
     float lastJumpTime = Mathf.NegativeInfinity;
     bool aiming;
     public bool Crouched;
@@ -55,6 +57,7 @@ public class AdvancedCharacterMovement : MonoBehaviour
         animator = GetComponent<Animator>();
         controller = GetComponentInChildren<UIController>();
         Controls = InputManager.inputActions;
+        CacheAnimatorParameters();
         Controls.Enable();
         Controls.Keyboard.MovementKeyBinds.performed += ctx =>
         {
@@ -116,6 +119,24 @@ public class AdvancedCharacterMovement : MonoBehaviour
             }
         };
         Controller = GetComponent<CharacterController>();
+    }
+    private void CacheAnimatorParameters()
+    {
+        hasGroundedParameter = AnimatorHasParameter("Grounded", AnimatorControllerParameterType.Bool);
+        hasVerticalVelocityParameter = AnimatorHasParameter("VerticalVelocity", AnimatorControllerParameterType.Float);
+    }
+
+    private bool AnimatorHasParameter(string parameterName, AnimatorControllerParameterType parameterType)
+    {
+        foreach (AnimatorControllerParameter parameter in animator.parameters)
+        {
+            if (parameter.name == parameterName && parameter.type == parameterType)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
     private void Update()
     {
@@ -244,8 +265,15 @@ public class AdvancedCharacterMovement : MonoBehaviour
             animator.ResetTrigger("Jumping");
         }
 
-        animator.SetBool("Grounded", grounded);
-        animator.SetFloat("VerticalVelocity", verticalVelocity);
+        if (hasGroundedParameter)
+        {
+            animator.SetBool("Grounded", grounded);
+        }
+
+        if (hasVerticalVelocityParameter)
+        {
+            animator.SetFloat("VerticalVelocity", verticalVelocity);
+        }
 
         if (weapon.CancelAllMovement == true) { return; }
         if (controller.CancelAllMovement == true) return;
