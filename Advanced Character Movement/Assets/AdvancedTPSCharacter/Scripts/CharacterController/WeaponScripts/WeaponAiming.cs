@@ -2,7 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if UNITY_6000_0_OR_NEWER
+using CM = Unity.Cinemachine;
+#else
 using CM = Cinemachine;
+#endif
 
 public class WeaponAiming : MonoBehaviour
 {
