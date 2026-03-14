@@ -12,7 +12,6 @@ public class RebindUI : MonoBehaviour
 
     [SerializeField]
     [Range(0, 10)]
-    [SerializeField]
     private int selectedBinding;
     [SerializeField]
     private InputBinding.DisplayStringOptions displayStringOptions;
