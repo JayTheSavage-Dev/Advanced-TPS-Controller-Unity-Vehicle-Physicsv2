@@ -11,7 +11,6 @@ public class RebindUI : MonoBehaviour
     private InputActionReference inputActionReference; //this is on the SO
 
     [SerializeField]
-    private bool excludeMouse = true;
     [Range(0, 10)]
     [SerializeField]
     private int selectedBinding;

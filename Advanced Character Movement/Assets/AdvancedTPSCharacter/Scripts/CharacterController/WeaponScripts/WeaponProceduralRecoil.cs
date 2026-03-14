@@ -37,7 +37,7 @@ public class WeaponProceduralRecoil : MonoBehaviour
 
         if (cameraShake != null)
         {
-            Camera currentCamera = FindObjectOfType<Camera>();
+            Camera currentCamera = FindFirstObjectByType<Camera>();
             if (currentCamera != null)
             {
                 cameraShake.GenerateImpulse(currentCamera.transform.forward);

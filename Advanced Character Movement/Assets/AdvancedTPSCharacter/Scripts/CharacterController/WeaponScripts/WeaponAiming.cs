@@ -11,12 +11,11 @@ public class WeaponAiming : MonoBehaviour
     float standardFOV;
     public float AimSpeed;
     [HideInInspector] public string currentWeapon;
-    bool isScoped = false;
     ActiveWeapon activeWeapon;
     private void Start()
     {
         Aiming = false;
-        cam = FindObjectOfType<Cinemachine.CinemachineFreeLook>();
+        cam = FindFirstObjectByType<Cinemachine.CinemachineFreeLook>();
         currentFOV = cam.m_Lens.FieldOfView;
         standardFOV = cam.m_Lens.FieldOfView;
         currentFOV = 50;
@@ -61,13 +60,11 @@ public class WeaponAiming : MonoBehaviour
         {
             currentFOV = 20;
             cam.m_Lens.FieldOfView = currentFOV;
-            isScoped = true;
         }
         else if (!Aiming && currentFOV < standardFOV)
         {
             currentFOV += Time.deltaTime * AimSpeed * 1.5f;
             cam.m_Lens.FieldOfView = currentFOV;
-            isScoped = false;
         }
         else if (!Aiming && currentFOV >= standardFOV)
         {
@@ -92,7 +89,6 @@ public class WeaponAiming : MonoBehaviour
         {
             currentFOV += Time.deltaTime * AimSpeed * 1.5f;
             cam.m_Lens.FieldOfView = currentFOV;
-            isScoped = false;
         }
         else if (!Aiming && currentFOV >= standardFOV)
         {

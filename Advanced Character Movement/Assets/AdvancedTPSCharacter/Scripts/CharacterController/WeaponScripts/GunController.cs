@@ -38,7 +38,7 @@ public class GunController : MonoBehaviour
     private void Start()
     {
         hitArea = GameObject.FindGameObjectWithTag("HitArea");
-        target = FindObjectOfType<CrossHairTarget>();
+        target = FindFirstObjectByType<CrossHairTarget>();
         if (target != null)
         {
             RaycastDestination = target.gameObject.transform;
@@ -51,7 +51,7 @@ public class GunController : MonoBehaviour
 
         if (activeWeaponSource != null)
         {
-            tracerEffect = activeWeaponSource.renderer;
+            tracerEffect = activeWeaponSource.tracerRenderer;
         }
     }
     public void StartAxeAttack(Animator Main, Animator Rig)
