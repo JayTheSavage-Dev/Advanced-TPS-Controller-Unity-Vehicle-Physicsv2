@@ -67,6 +67,7 @@ public class UIController : MonoBehaviour
             if (UIToolkitUIBridge.Instance != null)
             {
                 UIToolkitUIBridge.Instance.SetSettingsVisible(true);
+                UIToolkitUIBridge.Instance.SetStatusNotification("PAUSED", 1.2f);
             }
 
             CancelAllMovement = true;
@@ -86,6 +87,7 @@ public class UIController : MonoBehaviour
             if (UIToolkitUIBridge.Instance != null)
             {
                 UIToolkitUIBridge.Instance.SetSettingsVisible(false);
+                UIToolkitUIBridge.Instance.SetStatusNotification("RESUMED", 0.9f);
             }
 
             CancelAllMovement = false;

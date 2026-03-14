@@ -16,26 +16,23 @@ public class AmmoWidget : MonoBehaviour
         {
             displayText = string.Empty;
         }
-        else if (weaponName == "Axe")
+        else if (weaponName == "Axe" || weaponName == "Knife")
         {
-            displayText = "Axe";
-        }
-        else if (weaponName == "Knife")
-        {
-            displayText = "Knife";
+            displayText = "MELEE";
         }
         else
         {
-            displayText = weaponName + " " + ammoCount + "/" + maxammo;
+            displayText = ammoCount + " / " + maxammo;
         }
 
         if (ammoText != null)
         {
-            ammoText.text = displayText;
+            ammoText.text = string.IsNullOrEmpty(weaponName) ? string.Empty : weaponName + " " + displayText;
         }
 
         if (UIToolkitUIBridge.Instance != null)
         {
+            UIToolkitUIBridge.Instance.SetWeaponName(weaponName);
             UIToolkitUIBridge.Instance.SetAmmoText(displayText);
         }
     }

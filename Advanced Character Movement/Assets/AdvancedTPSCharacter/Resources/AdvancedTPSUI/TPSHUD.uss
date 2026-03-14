@@ -1,96 +1,278 @@
-#hud-root {
-    position: relative;
+:root {
+    --surface-bg: rgba(10, 14, 18, 0.74);
+    --surface-bg-strong: rgba(10, 14, 18, 0.9);
+    --surface-border: rgba(255, 255, 255, 0.14);
+    --text-primary: rgba(236, 240, 245, 0.96);
+    --text-muted: rgba(168, 180, 194, 0.95);
+    --accent: rgb(66, 173, 255);
+    --danger: rgb(224, 80, 80);
+    --health: rgb(83, 204, 122);
+    --armor: rgb(78, 160, 255);
+    --stamina: rgb(255, 190, 81);
 }
 
-.crosshair {
-    width: 10px;
-    height: 10px;
+.hud-root {
+    position: relative;
+    flex-grow: 1;
+}
+
+.hud-panel {
+    background-color: var(--surface-bg);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-    border-left-color: white;
-    border-right-color: white;
-    border-top-color: white;
-    border-bottom-color: white;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    margin-left: -5px;
-    margin-top: -5px;
+    border-left-color: var(--surface-border);
+    border-right-color: var(--surface-border);
+    border-top-color: var(--surface-border);
+    border-bottom-color: var(--surface-border);
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 14px;
+    padding-bottom: 14px;
 }
 
-.health-container {
+.panel-title {
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: 1.4px;
+    margin-bottom: 10px;
+    -unity-font-style: bold;
+}
+
+.vitals-panel {
     position: absolute;
     left: 24px;
-    bottom: 20px;
-    width: 240px;
+    bottom: 24px;
+    width: 340px;
 }
 
-.health-label {
-    color: white;
-    font-size: 15px;
+.stat-row {
+    margin-bottom: 10px;
+}
+
+.stat-header {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.stat-name {
+    color: var(--text-muted);
+    font-size: 10px;
+    letter-spacing: 1px;
     -unity-font-style: bold;
-    margin-bottom: 6px;
 }
 
-.health-bar-bg {
-    height: 14px;
-    background-color: rgba(20, 20, 20, 0.75);
+.stat-value {
+    color: var(--text-primary);
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+.stat-bar-bg {
+    height: 10px;
+    background-color: rgba(255, 255, 255, 0.07);
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border-bottom-left-radius: 3px;
     border-bottom-right-radius: 3px;
+    overflow: hidden;
 }
 
-.health-bar-fill {
-    height: 14px;
+.stat-bar-fill {
+    height: 100%;
     width: 100%;
-    background-color: #4bd14b;
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px;
+    transition-property: width, background-color;
+    transition-duration: 0.12s;
+}
+
+.health-fill { background-color: var(--health); }
+.armor-fill { background-color: var(--armor); }
+.stamina-fill { background-color: var(--stamina); }
+
+.weapon-panel {
+    position: absolute;
+    right: 24px;
+    bottom: 24px;
+    width: 300px;
+    align-items: flex-end;
+}
+
+.weapon-name {
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: 1.3px;
+    -unity-font-style: bold;
+    margin-bottom: 2px;
+}
+
+.ammo-row {
+    align-items: flex-end;
 }
 
 .ammo-label {
-    position: absolute;
-    right: 24px;
-    bottom: 20px;
-    color: white;
-    font-size: 18px;
+    color: var(--text-primary);
+    font-size: 35px;
+    line-height: 40px;
     -unity-font-style: bold;
 }
 
-.vehicle-prompt,
-.pickup-prompt,
-.interaction-prompt {
+.ammo-hint {
+    color: var(--text-muted);
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    margin-top: -4px;
+}
+
+.crosshair {
+    width: 32px;
+    height: 32px;
     position: absolute;
     left: 50%;
-    bottom: 50px;
-    margin-left: -120px;
-    min-width: 240px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.7);
+    top: 50%;
+    margin-left: -16px;
+    margin-top: -16px;
+}
+
+.crosshair-line {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.95);
+    transition-property: background-color, width, height;
+    transition-duration: 0.08s;
+}
+
+.crosshair-line-top,
+.crosshair-line-bottom {
+    left: 15px;
+    width: 2px;
+    height: 8px;
+}
+
+.crosshair-line-left,
+.crosshair-line-right {
+    top: 15px;
+    width: 8px;
+    height: 2px;
+}
+
+.crosshair-line-top { top: 1px; }
+.crosshair-line-right { right: 1px; }
+.crosshair-line-bottom { bottom: 1px; }
+.crosshair-line-left { left: 1px; }
+
+.crosshair-dot {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    width: 4px;
+    height: 4px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    background-color: rgba(255, 255, 255, 0.85);
+    transition-property: background-color;
+    transition-duration: 0.08s;
+}
+
+.crosshair-hit .crosshair-line,
+.crosshair-hit .crosshair-dot {
+    background-color: var(--danger);
+}
+
+.prompt-stack {
+    position: absolute;
+    left: 50%;
+    bottom: 110px;
+    margin-left: -220px;
+    width: 440px;
+    align-items: center;
+    gap: 8px;
+}
+
+.context-prompt {
+    min-width: 250px;
+    color: var(--text-primary);
+    background-color: rgba(10, 14, 18, 0.87);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(255, 255, 255, 0.16);
+    border-right-color: rgba(255, 255, 255, 0.16);
+    border-top-color: rgba(255, 255, 255, 0.16);
+    border-bottom-color: rgba(255, 255, 255, 0.16);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
     padding-left: 12px;
     padding-right: 12px;
-    padding-top: 6px;
-    padding-bottom: 6px;
+    padding-top: 8px;
+    padding-bottom: 8px;
     -unity-text-align: middle-center;
+    font-size: 13px;
+    -unity-font-style: bold;
+    letter-spacing: 0.8px;
     display: none;
+}
+
+.status-notification {
+    position: absolute;
+    left: 50%;
+    top: 72px;
+    margin-left: -220px;
+    width: 440px;
+    background-color: rgba(11, 20, 31, 0.82);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(66, 173, 255, 0.5);
+    border-right-color: rgba(66, 173, 255, 0.5);
+    border-top-color: rgba(66, 173, 255, 0.5);
+    border-bottom-color: rgba(66, 173, 255, 0.5);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding: 10px;
+    display: none;
+}
+
+#status-notification-label {
+    color: var(--text-primary);
+    -unity-text-align: middle-center;
+    font-size: 13px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
 }
 
 .settings-panel {
     position: absolute;
-    left: 20px;
-    top: 20px;
-    width: 340px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 12px;
+    left: 50%;
+    top: 50%;
+    margin-left: -240px;
+    margin-top: -130px;
+    width: 480px;
+    background-color: var(--surface-bg-strong);
     display: none;
 }
 
 .settings-title {
-    font-size: 18px;
+    color: var(--text-primary);
+    font-size: 28px;
+    letter-spacing: 2px;
     -unity-font-style: bold;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.settings-description {
+    color: var(--text-muted);
+    font-size: 14px;
 }
