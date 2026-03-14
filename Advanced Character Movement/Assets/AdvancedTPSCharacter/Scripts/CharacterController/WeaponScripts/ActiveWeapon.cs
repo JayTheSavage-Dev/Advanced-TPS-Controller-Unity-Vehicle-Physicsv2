@@ -2,6 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if UNITY_6000_0_OR_NEWER
+using CM = Unity.Cinemachine;
+#else
+using CM = Cinemachine;
+#endif
+
 [AddComponentMenu("Advanced TPS/ ActiveWeapon")]
 public class ActiveWeapon : MonoBehaviour
 {
@@ -33,7 +39,7 @@ public class ActiveWeapon : MonoBehaviour
     public TrailRenderer tracerRenderer;
     public AmmoWidget ammoWidget;
     WeaponAiming aiming;
-    [SerializeField] private Cinemachine.CinemachineFreeLook playerCamera;
+    [SerializeField] private CM.CinemachineFreeLook playerCamera;
     public bool CancelAllMovement { get; set; }
     float punchcombo;
     // Start is called before the first frame update
