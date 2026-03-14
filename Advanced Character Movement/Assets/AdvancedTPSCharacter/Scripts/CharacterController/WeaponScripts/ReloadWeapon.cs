@@ -12,6 +12,7 @@ public class ReloadWeapon : MonoBehaviour
     public Transform lefthand;
     public AmmoWidget ammoWidget;
     GameObject magazineHand;
+    private bool isReloading;
     private void Start()
     {
         activeWeapon = GetComponent<ActiveWeapon>();
@@ -21,8 +22,10 @@ public class ReloadWeapon : MonoBehaviour
         Controls.Keyboard.Reload.performed += ctx =>
         {
             GunController weapon = activeWeapon.GetActiveWeapon();
-            if (weapon != null && weapon.ammoCount != weapon.ClipSize && weapon.WeaponSlotType != ActiveWeapon.WeaponSlot.Axe && weapon.WeaponSlotType != ActiveWeapon.WeaponSlot.Knife)
+            if (CanTriggerReload(weapon))
             {
+                weapon.StopFiring();
+                isReloading = true;
                 rigController.SetTrigger("reload_weapon");
             }
         };
@@ -30,8 +33,10 @@ public class ReloadWeapon : MonoBehaviour
     private void Update()
     {
         GunController weapon = activeWeapon.GetActiveWeapon();
-        if (weapon != null && weapon.ammoCount <= 0 && weapon.WeaponSlotType != ActiveWeapon.WeaponSlot.Axe && weapon.WeaponSlotType != ActiveWeapon.WeaponSlot.Knife && !rigController.GetCurrentAnimatorStateInfo(0).IsTag("Reload"))
+        if (CanTriggerReload(weapon) && weapon.ammoCount <= 0)
         {
+            weapon.StopFiring();
+            isReloading = true;
             rigController.SetTrigger("reload_weapon");
         }
         if (weapon)
@@ -72,8 +77,29 @@ public class ReloadWeapon : MonoBehaviour
             Destroy(magazineHand);
         }
         weapon.ammoCount = weapon.ClipSize;
+        isReloading = false;
         rigController.ResetTrigger("reload_weapon");
         ammoWidget.Refresh(weapon.ammoCount, weapon.ClipSize, weapon.WeaponSlotType.ToString());
+    }
+
+    private bool CanTriggerReload(GunController weapon)
+    {
+        if (weapon == null || weapon.WeaponSlotType == ActiveWeapon.WeaponSlot.Axe || weapon.WeaponSlotType == ActiveWeapon.WeaponSlot.Knife)
+        {
+            return false;
+        }
+
+        if (weapon.ammoCount >= weapon.ClipSize || isReloading)
+        {
+            return false;
+        }
+
+        AnimatorStateInfo currentState = rigController.GetCurrentAnimatorStateInfo(0);
+        AnimatorStateInfo nextState = rigController.GetNextAnimatorStateInfo(0);
+        bool animatorReloading = currentState.IsTag("Reload") || currentState.IsName("Weapon_Reload_" + weapon.WeaponSlotType)
+            || (rigController.IsInTransition(0) && (nextState.IsTag("Reload") || nextState.IsName("Weapon_Reload_" + weapon.WeaponSlotType)));
+
+        return !animatorReloading;
     }
 
     private void Refillagazine()
