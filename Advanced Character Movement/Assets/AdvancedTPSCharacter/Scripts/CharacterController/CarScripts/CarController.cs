@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 
 public enum CarState
@@ -38,32 +39,53 @@ public class CarController : MonoBehaviour
     private void Awake()
     {
         carState = CarState.NotOccupied;
-        PlayerControls = new PlayerControls();
+        PlayerControls = InputManager.Actions;
+    }
+
+    private void OnEnable()
+    {
         PlayerControls.Enable();
-        PlayerControls.Car.Braking.performed += Ctx =>
+        PlayerControls.Car.Braking.performed += OnBrakePerformed;
+        PlayerControls.Car.Braking.canceled += OnBrakeCanceled;
+        PlayerControls.Car.Vertical.performed += OnVerticalPerformed;
+        PlayerControls.Car.Vertical.canceled += OnVerticalPerformed;
+        PlayerControls.Car.Horizontal.performed += OnHorizontalPerformed;
+        PlayerControls.Car.Horizontal.canceled += OnHorizontalPerformed;
+    }
+
+    private void OnDisable()
+    {
+        if (PlayerControls == null)
         {
-            isBreaking = true;
-        };
-        PlayerControls.Car.Braking.canceled += Ctx =>
-        {
-            isBreaking = false;
-        };
-        PlayerControls.Car.Vertical.performed += Ctx =>
-        {
-            verticalInput = Ctx.ReadValue<float>();
-        };
-        PlayerControls.Car.Vertical.canceled += Ctx =>
-        {
-            verticalInput = Ctx.ReadValue<float>();
-        };
-        PlayerControls.Car.Horizontal.performed += Ctx =>
-        {
-            horizontalInput = Ctx.ReadValue<float>();
-        };
-        PlayerControls.Car.Horizontal.canceled += Ctx =>
-        {
-            horizontalInput = Ctx.ReadValue<float>();
-        };
+            return;
+        }
+
+        PlayerControls.Car.Braking.performed -= OnBrakePerformed;
+        PlayerControls.Car.Braking.canceled -= OnBrakeCanceled;
+        PlayerControls.Car.Vertical.performed -= OnVerticalPerformed;
+        PlayerControls.Car.Vertical.canceled -= OnVerticalPerformed;
+        PlayerControls.Car.Horizontal.performed -= OnHorizontalPerformed;
+        PlayerControls.Car.Horizontal.canceled -= OnHorizontalPerformed;
+    }
+
+    private void OnBrakePerformed(InputAction.CallbackContext ctx)
+    {
+        isBreaking = true;
+    }
+
+    private void OnBrakeCanceled(InputAction.CallbackContext ctx)
+    {
+        isBreaking = false;
+    }
+
+    private void OnVerticalPerformed(InputAction.CallbackContext ctx)
+    {
+        verticalInput = ctx.ReadValue<float>();
+    }
+
+    private void OnHorizontalPerformed(InputAction.CallbackContext ctx)
+    {
+        horizontalInput = ctx.ReadValue<float>();
     }
     private void FixedUpdate()
     {

@@ -14,7 +14,7 @@ public class WeaponAiming : MonoBehaviour
     public float AimSpeed;
     [HideInInspector] public string currentWeapon;
     ActiveWeapon activeWeapon;
-    private void Start()
+    private void Awake()
     {
         Aiming = false;
         cam = FindFirstObjectByType<CM.CinemachineFreeLook>();
@@ -26,17 +26,36 @@ public class WeaponAiming : MonoBehaviour
             standardFOV = 51;
             cam.m_Lens.FieldOfView = currentFOV;
         }
-        controls = InputManager.inputActions ?? new PlayerControls();
-        controls.Enable();
-        controls.Keyboard.Aim.started += ctx =>
-        {
-            Aiming = true;
-        };
-        controls.Keyboard.Aim.canceled += ctx =>
-        {
-            Aiming = false;
-        };
+        controls = InputManager.Actions;
         activeWeapon = GetComponent<ActiveWeapon>();
+    }
+
+    private void OnEnable()
+    {
+        controls.Enable();
+        controls.Keyboard.Aim.started += OnAimStarted;
+        controls.Keyboard.Aim.canceled += OnAimCanceled;
+    }
+
+    private void OnDisable()
+    {
+        if (controls == null)
+        {
+            return;
+        }
+
+        controls.Keyboard.Aim.started -= OnAimStarted;
+        controls.Keyboard.Aim.canceled -= OnAimCanceled;
+    }
+
+    private void OnAimStarted(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        Aiming = true;
+    }
+
+    private void OnAimCanceled(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        Aiming = false;
     }
     private void Update()
     {

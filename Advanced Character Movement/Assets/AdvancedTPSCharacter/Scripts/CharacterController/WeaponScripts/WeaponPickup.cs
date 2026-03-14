@@ -32,12 +32,7 @@ public class WeaponPickup : MonoBehaviour
             return;
         }
 
-        if (InputManager.inputActions == null)
-        {
-            return;
-        }
-
-        if (InputManager.inputActions.Keyboard.Equip.WasPressedThisFrame())
+        if (InputManager.Actions.Keyboard.Equip.WasPressedThisFrame())
         {
             GunController newWeapon = Instantiate(weaponFab);
             activeWeaponInRange.Equip(newWeapon, true);
