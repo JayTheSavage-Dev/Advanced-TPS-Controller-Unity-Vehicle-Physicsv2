@@ -1,26 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AdvancedCameraController : MonoBehaviour
 {
     [SerializeField] private bool LockCursor;
+    private UIController uiController;
+
     private void Start()
     {
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        ApplyCursorState(false);
     }
-    void LateUpdate()
+
+    private void LateUpdate()
     {
-        if (FindFirstObjectByType<UIController>().CancelAllMovement == true)
+        if (uiController == null)
         {
-           Cursor.visible = true;
-           Cursor.lockState = CursorLockMode.None;
+            uiController = FindFirstObjectByType<UIController>();
         }
-        else
-        {
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
-        }
+
+        bool unlockCursor = uiController != null && uiController.CancelAllMovement;
+        ApplyCursorState(unlockCursor);
+    }
+
+    private static void ApplyCursorState(bool unlockCursor)
+    {
+        Cursor.visible = unlockCursor;
+        Cursor.lockState = unlockCursor ? CursorLockMode.None : CursorLockMode.Locked;
     }
 }
