@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -26,9 +25,15 @@ public class AdvancedCharacterMovement : MonoBehaviour
     private CharacterController Controller;
     private PlayerControls Controls;
     [SerializeField] private float ConstGravity = -9.81f;
+    [SerializeField] private float jumpHeight = 1.5f;
+    [SerializeField] private float jumpCooldown = 0.1f;
     bool running;
     bool crouching;
     bool jumping;
+    bool jumpAnimationTriggered;
+    bool hasGroundedParameter;
+    bool hasVerticalVelocityParameter;
+    float lastJumpTime = Mathf.NegativeInfinity;
     bool aiming;
     public bool Crouched;
     [HideInInspector]
@@ -52,6 +57,7 @@ public class AdvancedCharacterMovement : MonoBehaviour
         animator = GetComponent<Animator>();
         controller = GetComponentInChildren<UIController>();
         Controls = InputManager.inputActions;
+        CacheAnimatorParameters();
         Controls.Enable();
         Controls.Keyboard.MovementKeyBinds.performed += ctx =>
         {
@@ -91,6 +97,11 @@ public class AdvancedCharacterMovement : MonoBehaviour
         };
         Controls.Keyboard.Jump.performed += ctx =>
         {
+            if (!Controller.isGrounded) { return; }
+            if (state == CharacterState.Vehicle) { return; }
+            if (controller.CancelAllMovement) { return; }
+            if (weapon.CancelAllMovement) { return; }
+            if (Time.time < lastJumpTime + jumpCooldown) { return; }
             jumping = true;
         };
         Controls.Keyboard.Equip.performed += ctx =>
@@ -109,6 +120,24 @@ public class AdvancedCharacterMovement : MonoBehaviour
         };
         Controller = GetComponent<CharacterController>();
     }
+    private void CacheAnimatorParameters()
+    {
+        hasGroundedParameter = AnimatorHasParameter("Grounded", AnimatorControllerParameterType.Bool);
+        hasVerticalVelocityParameter = AnimatorHasParameter("VerticalVelocity", AnimatorControllerParameterType.Float);
+    }
+
+    private bool AnimatorHasParameter(string parameterName, AnimatorControllerParameterType parameterType)
+    {
+        foreach (AnimatorControllerParameter parameter in animator.parameters)
+        {
+            if (parameter.name == parameterName && parameter.type == parameterType)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
     private void Update()
     {
         Crouched = crouching;
@@ -119,10 +148,10 @@ public class AdvancedCharacterMovement : MonoBehaviour
         }
 
         if (state == CharacterState.Vehicle) { IsWalking = false; IsCrouching = false; IsRunning = false; return; }
-        HandleAnimations();
         HandleGravity();
         HandleMovement();
         HandleCharacterRotation();
+        HandleAnimations();
     }
     //Move Character On Input
     private void HandleMovement()
@@ -205,22 +234,53 @@ public class AdvancedCharacterMovement : MonoBehaviour
     }
     private void HandleGravity()
     {
+        bool grounded = IsGrounded();
+        bool jumpedThisFrame = false;
 
-        if (IsGrounded() && velocity.y < 0)
+        if (jumping)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * ConstGravity);
+            jumping = false;
+            jumpAnimationTriggered = false;
+            lastJumpTime = Time.time;
+            jumpedThisFrame = true;
+        }
+
+        if (grounded && velocity.y < 0f && !jumpedThisFrame)
         {
             velocity.y = -2f;
         }
+
         velocity.y += ConstGravity * Time.deltaTime;
         Controller.Move(velocity * Time.deltaTime);
     }
     private void HandleAnimations()
     {
-        if (jumping)
+        bool grounded = IsGrounded();
+        float verticalVelocity = velocity.y;
+
+        if (!grounded && verticalVelocity > 0f && !jumpAnimationTriggered)
         {
             animator.SetTrigger("Jumping");
-            StartCoroutine(JumpAnimate());
-            return;
+            jumpAnimationTriggered = true;
         }
+
+        if (grounded && verticalVelocity <= 0f)
+        {
+            jumpAnimationTriggered = false;
+            animator.ResetTrigger("Jumping");
+        }
+
+        if (hasGroundedParameter)
+        {
+            animator.SetBool("Grounded", grounded);
+        }
+
+        if (hasVerticalVelocityParameter)
+        {
+            animator.SetFloat("VerticalVelocity", verticalVelocity);
+        }
+
         if (weapon.CancelAllMovement == true) { return; }
         if (controller.CancelAllMovement == true) return;
         bool forwardPressed = PlayerMoveInput.z > 0.5;
@@ -370,12 +430,6 @@ public class AdvancedCharacterMovement : MonoBehaviour
             animator.SetFloat("StandingVelocityZ", VelocityZ);
             animator.SetFloat("VelocityX", VelocityX);
         }
-    }
-    IEnumerator JumpAnimate()
-    {
-        yield return new WaitForSeconds(2.333f);
-        jumping = false;
-        animator.ResetTrigger("Jumping");
     }
     private void HandleCharacterRotation()
     {
