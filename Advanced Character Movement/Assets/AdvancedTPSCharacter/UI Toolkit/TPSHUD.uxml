@@ -1,11 +1,23 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
     <ui:VisualElement name="hud-root" style="flex-grow: 1;">
         <ui:VisualElement name="crosshair" class="crosshair" />
+
+        <ui:VisualElement name="health-container" class="health-container">
+            <ui:Label name="health-label" class="health-label" text="HP 100/100" />
+            <ui:VisualElement class="health-bar-bg">
+                <ui:VisualElement name="health-bar-fill" class="health-bar-fill" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
         <ui:Label name="ammo-label" class="ammo-label" text="" />
         <ui:Label name="vehicle-prompt" class="vehicle-prompt" text="Press E to enter vehicle" />
         <ui:VisualElement name="pickup-prompt" class="pickup-prompt">
             <ui:Label name="pickup-prompt-label" text="Press E to pick up" />
         </ui:VisualElement>
+        <ui:VisualElement name="interaction-prompt" class="interaction-prompt">
+            <ui:Label name="interaction-prompt-label" text="Press E to interact" />
+        </ui:VisualElement>
+
         <ui:VisualElement name="settings-panel" class="settings-panel">
             <ui:Label text="Settings" class="settings-title" />
             <ui:Label text="Use the existing key rebinding panel content here." />

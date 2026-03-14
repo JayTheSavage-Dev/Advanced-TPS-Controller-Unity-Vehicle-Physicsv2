@@ -37,6 +37,8 @@ public class CarCheck : MonoBehaviour
         if (useUIToolkit)
         {
             UIToolkitUIBridge.Instance.SetVehiclePromptVisible(true);
+            UIToolkitUIBridge.Instance.SetInteractionPromptText("Press E to enter vehicle");
+            UIToolkitUIBridge.Instance.SetInteractionPromptVisible(true);
             UIToolkitUIBridge.Instance.SetCrosshairVisible(false);
         }
 
@@ -66,6 +68,7 @@ public class CarCheck : MonoBehaviour
         if (useUIToolkit)
         {
             UIToolkitUIBridge.Instance.SetVehiclePromptVisible(false);
+            UIToolkitUIBridge.Instance.SetInteractionPromptVisible(false);
             UIToolkitUIBridge.Instance.SetCrosshairVisible(true);
         }
 
@@ -89,6 +92,7 @@ public class CarCheck : MonoBehaviour
         if (useUIToolkit)
         {
             UIToolkitUIBridge.Instance.SetVehiclePromptVisible(false);
+            UIToolkitUIBridge.Instance.SetInteractionPromptVisible(false);
         }
 
         if (carController == null) { return; }

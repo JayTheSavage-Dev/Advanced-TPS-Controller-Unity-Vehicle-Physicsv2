@@ -49,6 +49,7 @@ public class AdvancedCharacterMovement : MonoBehaviour
     [SerializeField] private GameObject CameraLookAt;
     [SerializeField] private GameObject CameraLookAtOffset;
     private Vector3 CameraLookAtOffsetVector;
+    private PlayerHealth playerHealth;
     private void Start()
     {
         widget = transform.parent.gameObject.GetComponentInChildren<AmmoWidget>();
@@ -120,6 +121,11 @@ public class AdvancedCharacterMovement : MonoBehaviour
             }
         };
         Controller = GetComponent<CharacterController>();
+        playerHealth = GetComponent<PlayerHealth>();
+        if (playerHealth == null)
+        {
+            playerHealth = gameObject.AddComponent<PlayerHealth>();
+        }
     }
     private void CacheAnimatorParameters()
     {
@@ -444,7 +450,7 @@ public class AdvancedCharacterMovement : MonoBehaviour
     {
         CarCheck carCheck = GetComponentInChildren<CarCheck>();
         if (carCheck == null) { return; }
-        if (carCheck.CanEnterVehicle == true && carCheck.CarCheckUI.gameObject.activeSelf == true)
+        if (carCheck.CanEnterVehicle)
         {
             Debug.Log("We Can Enter Vehicle");
             carCheck.EnterVehicle();
@@ -504,7 +510,7 @@ public class AdvancedCharacterMovement : MonoBehaviour
     {
         CarCheck carCheck = GetComponentInChildren<CarCheck>();
         if (carCheck == null) { return; }
-        if (carCheck.CanEnterVehicle == false && carCheck.CarCheckUI.gameObject.activeSelf == false)
+        if (!carCheck.CanEnterVehicle)
         {
             carCheck.ExitVehicle();
         }

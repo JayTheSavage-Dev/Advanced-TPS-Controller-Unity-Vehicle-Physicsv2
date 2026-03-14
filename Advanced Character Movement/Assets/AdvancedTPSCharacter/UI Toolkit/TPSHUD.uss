@@ -20,6 +20,37 @@
     margin-top: -5px;
 }
 
+.health-container {
+    position: absolute;
+    left: 24px;
+    bottom: 20px;
+    width: 240px;
+}
+
+.health-label {
+    color: white;
+    font-size: 15px;
+    unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.health-bar-bg {
+    height: 14px;
+    background-color: rgba(20, 20, 20, 0.75);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.health-bar-fill {
+    height: 14px;
+    width: 100%;
+    background-color: #4bd14b;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
 .ammo-label {
     position: absolute;
     right: 24px;
@@ -30,7 +61,8 @@
 }
 
 .vehicle-prompt,
-.pickup-prompt {
+.pickup-prompt,
+.interaction-prompt {
     position: absolute;
     left: 50%;
     bottom: 50px;

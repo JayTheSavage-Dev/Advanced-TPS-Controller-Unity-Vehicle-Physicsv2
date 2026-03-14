@@ -21,6 +21,7 @@ public class WeaponPickup : MonoBehaviour
         if (useUIToolkit)
         {
             UIToolkitUIBridge.Instance.SetPickupPromptVisible(false);
+            UIToolkitUIBridge.Instance.SetInteractionPromptVisible(false);
         }
     }
 
@@ -50,6 +51,7 @@ public class WeaponPickup : MonoBehaviour
             if (useUIToolkit)
             {
                 UIToolkitUIBridge.Instance.SetPickupPromptVisible(false);
+                UIToolkitUIBridge.Instance.SetInteractionPromptVisible(false);
             }
 
             if (destroyPickupAfterCollect)
@@ -82,6 +84,8 @@ public class WeaponPickup : MonoBehaviour
         {
             UIToolkitUIBridge.Instance.SetPickupPromptText(pickupPromptText);
             UIToolkitUIBridge.Instance.SetPickupPromptVisible(true);
+            UIToolkitUIBridge.Instance.SetInteractionPromptText(pickupPromptText);
+            UIToolkitUIBridge.Instance.SetInteractionPromptVisible(true);
         }
     }
 
@@ -103,6 +107,7 @@ public class WeaponPickup : MonoBehaviour
         if (useUIToolkit)
         {
             UIToolkitUIBridge.Instance.SetPickupPromptVisible(false);
+            UIToolkitUIBridge.Instance.SetInteractionPromptVisible(false);
         }
     }
 }
