@@ -1,22 +1,42 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AmmoWidget : MonoBehaviour
 {
-    public TMPro.TMP_Text ammoText;
+    [SerializeField] private TMPro.TMP_Text ammoText;
+
     private void Start()
     {
-        ammoText.text = "";
+        Refresh(0, 0, null);
     }
+
     public void Refresh(int ammoCount, int maxammo, string weaponName)
     {
-        if (weaponName == null) { ammoText.text = ""; return; }
-        if(weaponName == "Axe") { ammoText.text = "Axe"; }
-        else if (weaponName == "Knife") { ammoText.text = "Knife"; }
+        string displayText;
+        if (string.IsNullOrEmpty(weaponName))
+        {
+            displayText = string.Empty;
+        }
+        else if (weaponName == "Axe")
+        {
+            displayText = "Axe";
+        }
+        else if (weaponName == "Knife")
+        {
+            displayText = "Knife";
+        }
         else
         {
-            ammoText.text = weaponName + " " + ammoCount.ToString() + "/" + maxammo.ToString();
+            displayText = weaponName + " " + ammoCount + "/" + maxammo;
+        }
+
+        if (ammoText != null)
+        {
+            ammoText.text = displayText;
+        }
+
+        if (UIToolkitUIBridge.Instance != null)
+        {
+            UIToolkitUIBridge.Instance.SetAmmoText(displayText);
         }
     }
 }

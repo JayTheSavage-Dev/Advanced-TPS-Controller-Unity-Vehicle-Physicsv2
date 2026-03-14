@@ -6,6 +6,7 @@ public class WeaponPickup : MonoBehaviour
     [SerializeField] private GunController weaponFab;
     [SerializeField] private bool destroyPickupAfterCollect = true;
     [SerializeField] private GameObject pickupPrompt;
+    [SerializeField] private string pickupPromptText = "Press E to pick up";
 
     private ActiveWeapon activeWeaponInRange;
 
@@ -14,6 +15,11 @@ public class WeaponPickup : MonoBehaviour
         if (pickupPrompt != null)
         {
             pickupPrompt.SetActive(false);
+        }
+
+        if (UIToolkitUIBridge.Instance != null)
+        {
+            UIToolkitUIBridge.Instance.SetPickupPromptVisible(false);
         }
     }
 
@@ -37,6 +43,11 @@ public class WeaponPickup : MonoBehaviour
             if (pickupPrompt != null)
             {
                 pickupPrompt.SetActive(false);
+            }
+
+            if (UIToolkitUIBridge.Instance != null)
+            {
+                UIToolkitUIBridge.Instance.SetPickupPromptVisible(false);
             }
 
             if (destroyPickupAfterCollect)
@@ -63,6 +74,12 @@ public class WeaponPickup : MonoBehaviour
         {
             pickupPrompt.SetActive(true);
         }
+
+        if (UIToolkitUIBridge.Instance != null)
+        {
+            UIToolkitUIBridge.Instance.SetPickupPromptText(pickupPromptText);
+            UIToolkitUIBridge.Instance.SetPickupPromptVisible(true);
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -77,6 +94,11 @@ public class WeaponPickup : MonoBehaviour
         if (pickupPrompt != null)
         {
             pickupPrompt.SetActive(false);
+        }
+
+        if (UIToolkitUIBridge.Instance != null)
+        {
+            UIToolkitUIBridge.Instance.SetPickupPromptVisible(false);
         }
     }
 }

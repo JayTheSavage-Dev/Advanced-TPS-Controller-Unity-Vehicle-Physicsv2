@@ -102,8 +102,6 @@ public class ActiveWeapon : MonoBehaviour
          {
                 if(GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
                 GetComponent<AdvancedCharacterMovement>().IsRunning = false;
-                GetComponent<AdvancedCharacterMovement>().IsCrouching = false;
-                GetComponent<AdvancedCharacterMovement>().IsWalking = false;
                 var controller = FindFirstObjectByType<UIController>();
                 if (controller.CancelAllMovement == true) { return; }
                 if (FindFirstObjectByType<UIController>().CancelAllMovement == true) { return; }
@@ -473,6 +471,16 @@ public class ActiveWeapon : MonoBehaviour
                 return;
             }
         }
+    }
+
+    public bool IsWeaponBusy()
+    {
+        if (currentWeapon == null)
+        {
+            return false;
+        }
+
+        return currentWeapon.isFiring || currentWeapon.AxeAttack || currentWeapon.KnifeAttacking;
     }
 
     void StartPunchAttack(float combo)

@@ -41,6 +41,11 @@ public class UIController : MonoBehaviour
                 removecam.SetActive(false);
             }
 
+            if (UIToolkitUIBridge.Instance != null)
+            {
+                UIToolkitUIBridge.Instance.SetSettingsVisible(true);
+            }
+
             CancelAllMovement = true;
         }
         else
@@ -53,6 +58,11 @@ public class UIController : MonoBehaviour
             if (removecam != null)
             {
                 removecam.SetActive(true);
+            }
+
+            if (UIToolkitUIBridge.Instance != null)
+            {
+                UIToolkitUIBridge.Instance.SetSettingsVisible(false);
             }
 
             CancelAllMovement = false;

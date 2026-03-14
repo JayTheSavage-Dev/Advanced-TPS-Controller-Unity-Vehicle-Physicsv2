@@ -112,6 +112,12 @@ public class AdvancedCharacterMovement : MonoBehaviour
     private void Update()
     {
         Crouched = crouching;
+        if (weapon != null && weapon.IsWeaponBusy())
+        {
+            running = false;
+            IsRunning = false;
+        }
+
         if (state == CharacterState.Vehicle) { IsWalking = false; IsCrouching = false; IsRunning = false; return; }
         HandleAnimations();
         HandleGravity();
