@@ -1,17 +1,82 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WeaponPickup : MonoBehaviour
 {
-    public GunController weaponFab;
+    [Header("Pickup")]
+    [SerializeField] private GunController weaponFab;
+    [SerializeField] private bool destroyPickupAfterCollect = true;
+    [SerializeField] private GameObject pickupPrompt;
+
+    private ActiveWeapon activeWeaponInRange;
+
+    private void Awake()
+    {
+        if (pickupPrompt != null)
+        {
+            pickupPrompt.SetActive(false);
+        }
+    }
+
+    private void Update()
+    {
+        if (activeWeaponInRange == null || weaponFab == null)
+        {
+            return;
+        }
+
+        if (InputManager.inputActions == null)
+        {
+            return;
+        }
+
+        if (InputManager.inputActions.Keyboard.Equip.WasPressedThisFrame())
+        {
+            GunController newWeapon = Instantiate(weaponFab);
+            activeWeaponInRange.Equip(newWeapon, true);
+
+            if (pickupPrompt != null)
+            {
+                pickupPrompt.SetActive(false);
+            }
+
+            if (destroyPickupAfterCollect)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         ActiveWeapon activeWeapon = other.gameObject.GetComponent<ActiveWeapon>();
-        if (activeWeapon)
+        if (activeWeapon == null)
         {
-            GunController newWeapon = Instantiate(weaponFab);
-            activeWeapon.Equip(newWeapon, true);
+            return;
+        }
+
+        activeWeaponInRange = activeWeapon;
+        if (pickupPrompt != null)
+        {
+            pickupPrompt.SetActive(true);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        ActiveWeapon activeWeapon = other.gameObject.GetComponent<ActiveWeapon>();
+        if (activeWeapon == null || activeWeapon != activeWeaponInRange)
+        {
+            return;
+        }
+
+        activeWeaponInRange = null;
+        if (pickupPrompt != null)
+        {
+            pickupPrompt.SetActive(false);
         }
     }
 }

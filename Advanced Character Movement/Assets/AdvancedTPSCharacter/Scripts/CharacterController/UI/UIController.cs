@@ -36,15 +36,31 @@ public class UIController : MonoBehaviour
     private void HandleOpenMenu()
     {
         if (Settings)
-        { 
-          RebindingUI.SetActive(true);
-          removecam.SetActive(false);
-          CancelAllMovement = true;
+        {
+            if (RebindingUI != null)
+            {
+                RebindingUI.SetActive(true);
+            }
+
+            if (removecam != null)
+            {
+                removecam.SetActive(false);
+            }
+
+            CancelAllMovement = true;
         }
         else
         {
-          RebindingUI.SetActive(false);
-            removecam.SetActive(true);
+            if (RebindingUI != null)
+            {
+                RebindingUI.SetActive(false);
+            }
+
+            if (removecam != null)
+            {
+                removecam.SetActive(true);
+            }
+
             CancelAllMovement = false;
         }
     }

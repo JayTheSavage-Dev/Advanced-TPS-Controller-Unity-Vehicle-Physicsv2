@@ -20,8 +20,8 @@ public class CarCheck : MonoBehaviour
             CarCheckUI.SetActive(true);
             Crosshair.SetActive(false);
             CurrentVehicle = other.gameObject;
+            CanEnterVehicle = true;
         }
-        CanEnterVehicle = true;
     }
     private void OnTriggerExit(Collider other)
     {
@@ -29,8 +29,9 @@ public class CarCheck : MonoBehaviour
         {
             CarCheckUI.SetActive(false);
             Crosshair.SetActive(true);
+            CanEnterVehicle = false;
+            CurrentVehicle = null;
         }
-        CanEnterVehicle = false;
     }
     public void EnterVehicle()
     {

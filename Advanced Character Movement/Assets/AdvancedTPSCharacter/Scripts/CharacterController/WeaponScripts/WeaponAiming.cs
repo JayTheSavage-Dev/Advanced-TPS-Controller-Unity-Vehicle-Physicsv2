@@ -22,7 +22,7 @@ public class WeaponAiming : MonoBehaviour
         currentFOV = 50;
         standardFOV = 51;
         cam.m_Lens.FieldOfView = currentFOV;
-        controls = new PlayerControls();
+        controls = InputManager.inputActions ?? new PlayerControls();
         controls.Enable();
         controls.Keyboard.Aim.started += ctx =>
         {
@@ -37,11 +37,14 @@ public class WeaponAiming : MonoBehaviour
     private void Update()
     {
         var weapon = activeWeapon.GetActiveWeapon();
-        if (weapon && (currentWeapon != "Axe") && (currentWeapon != "Knife"))
+        if (weapon && weapon.recoil != null && (currentWeapon != "Axe") && (currentWeapon != "Knife"))
         {
-                weapon.recoil.RecoilModifier = Aiming ? 0.3f : 1.0f;
+            weapon.recoil.RecoilModifier = Aiming ? 0.3f : 1.0f;
         }
-        if(currentWeapon == "Axe" || currentWeapon == "") { return;  }
+        if (string.IsNullOrEmpty(currentWeapon) || currentWeapon == "Axe" || currentWeapon == "Knife")
+        {
+            return;
+        }
         if(currentWeapon == "Sniper") { SniperAiming(); }
         else { OtherWeaponAiming(); }
     }
@@ -66,9 +69,9 @@ public class WeaponAiming : MonoBehaviour
             cam.m_Lens.FieldOfView = currentFOV;
             isScoped = false;
         }
-        else if (!Aiming && currentFOV == 50)
+        else if (!Aiming && currentFOV >= standardFOV)
         {
-            currentFOV = 50;
+            currentFOV = standardFOV;
             cam.m_Lens.FieldOfView = currentFOV;
         }
     }
@@ -80,9 +83,9 @@ public class WeaponAiming : MonoBehaviour
             currentFOV -= Time.deltaTime * AimSpeed;
             cam.m_Lens.FieldOfView = currentFOV;
         }
-        else if (Aiming && currentFOV == 35)
+        else if (Aiming && currentFOV <= 35f)
         {
-            currentFOV = 50;
+            currentFOV = 35f;
             cam.m_Lens.FieldOfView = currentFOV;
         }
         else if (!Aiming && currentFOV < standardFOV)
@@ -91,9 +94,9 @@ public class WeaponAiming : MonoBehaviour
             cam.m_Lens.FieldOfView = currentFOV;
             isScoped = false;
         }
-        else if (!Aiming && currentFOV == 50)
+        else if (!Aiming && currentFOV >= standardFOV)
         {
-            currentFOV = 50;
+            currentFOV = standardFOV;
             cam.m_Lens.FieldOfView = currentFOV;
         }
     }
