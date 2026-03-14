@@ -1,26 +1,71 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <ui:VisualElement name="hud-root" style="flex-grow: 1;">
-        <ui:VisualElement name="crosshair" class="crosshair" />
+    <ui:VisualElement name="hud-root" class="hud-root">
+        <ui:VisualElement name="crosshair" class="crosshair">
+            <ui:VisualElement class="crosshair-line crosshair-line-top" />
+            <ui:VisualElement class="crosshair-line crosshair-line-right" />
+            <ui:VisualElement class="crosshair-line crosshair-line-bottom" />
+            <ui:VisualElement class="crosshair-line crosshair-line-left" />
+            <ui:VisualElement class="crosshair-dot" />
+        </ui:VisualElement>
 
-        <ui:VisualElement name="health-container" class="health-container">
-            <ui:Label name="health-label" class="health-label" text="HP 100/100" />
-            <ui:VisualElement class="health-bar-bg">
-                <ui:VisualElement name="health-bar-fill" class="health-bar-fill" />
+        <ui:VisualElement name="status-notification" class="status-notification">
+            <ui:Label name="status-notification-label" text="" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="vitals-panel" class="hud-panel vitals-panel">
+            <ui:Label name="vitals-title" class="panel-title" text="OPERATOR STATUS" />
+            <ui:VisualElement name="health-container" class="stat-row">
+                <ui:VisualElement class="stat-header">
+                    <ui:Label class="stat-name" text="HEALTH" />
+                    <ui:Label name="health-label" class="stat-value" text="100 / 100" />
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-bar-bg">
+                    <ui:VisualElement name="health-bar-fill" class="stat-bar-fill health-fill" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="armor-container" class="stat-row">
+                <ui:VisualElement class="stat-header">
+                    <ui:Label class="stat-name" text="ARMOR" />
+                    <ui:Label name="armor-label" class="stat-value" text="0 / 100" />
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-bar-bg">
+                    <ui:VisualElement name="armor-bar-fill" class="stat-bar-fill armor-fill" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="stamina-container" class="stat-row">
+                <ui:VisualElement class="stat-header">
+                    <ui:Label class="stat-name" text="STAMINA" />
+                    <ui:Label name="stamina-label" class="stat-value" text="100 / 100" />
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-bar-bg">
+                    <ui:VisualElement name="stamina-bar-fill" class="stat-bar-fill stamina-fill" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <ui:Label name="ammo-label" class="ammo-label" text="" />
-        <ui:Label name="vehicle-prompt" class="vehicle-prompt" text="Press E to enter vehicle" />
-        <ui:VisualElement name="pickup-prompt" class="pickup-prompt">
-            <ui:Label name="pickup-prompt-label" text="Press E to pick up" />
-        </ui:VisualElement>
-        <ui:VisualElement name="interaction-prompt" class="interaction-prompt">
-            <ui:Label name="interaction-prompt-label" text="Press E to interact" />
+        <ui:VisualElement name="weapon-panel" class="hud-panel weapon-panel">
+            <ui:Label name="weapon-name-label" class="weapon-name" text="UNARMED" />
+            <ui:VisualElement class="ammo-row">
+                <ui:Label name="ammo-label" class="ammo-label" text="" />
+                <ui:Label name="ammo-hint-label" class="ammo-hint" text="MAG / RESERVE" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
-        <ui:VisualElement name="settings-panel" class="settings-panel">
-            <ui:Label text="Settings" class="settings-title" />
-            <ui:Label text="Use the existing key rebinding panel content here." />
+        <ui:VisualElement name="prompt-stack" class="prompt-stack">
+            <ui:Label name="vehicle-prompt" class="context-prompt" text="PRESS E TO ENTER VEHICLE" />
+            <ui:VisualElement name="pickup-prompt" class="context-prompt">
+                <ui:Label name="pickup-prompt-label" text="PRESS E TO PICK UP" />
+            </ui:VisualElement>
+            <ui:VisualElement name="interaction-prompt" class="context-prompt">
+                <ui:Label name="interaction-prompt-label" text="PRESS E TO INTERACT" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="settings-panel" class="settings-panel hud-panel">
+            <ui:Label text="PAUSED" class="settings-title" />
+            <ui:Label text="Open keybindings from the legacy panel to configure controls." class="settings-description" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
