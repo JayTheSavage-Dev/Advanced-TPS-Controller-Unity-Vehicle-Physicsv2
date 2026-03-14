@@ -14,6 +14,7 @@ public class ReloadWeapon : MonoBehaviour
         public Vector3 droppedMagazinePositionOffset;
         public Vector3 droppedMagazineEulerOffset;
     }
+    private const string ReloadLockLayersParam = "reload_lock_layers";
 
     [SerializeField] private Animator rigController;
     private PlayerControls Controls;
@@ -26,6 +27,8 @@ public class ReloadWeapon : MonoBehaviour
     [SerializeField] private bool useSlotSpecificMagazinePose = true;
     GameObject magazineHand;
     private bool isReloading;
+    public bool IsReloading => isReloading;
+    public event Action<bool> ReloadStateChanged;
     private void Start()
     {
         InitializeDefaultReloadPoseOverrides();
@@ -39,7 +42,7 @@ public class ReloadWeapon : MonoBehaviour
             if (CanTriggerReload(weapon))
             {
                 weapon.StopFiring();
-                isReloading = true;
+                SetReloading(true);
                 rigController.SetTrigger("reload_weapon");
             }
         };
@@ -50,7 +53,7 @@ public class ReloadWeapon : MonoBehaviour
         if (CanTriggerReload(weapon) && weapon.ammoCount <= 0)
         {
             weapon.StopFiring();
-            isReloading = true;
+            SetReloading(true);
             rigController.SetTrigger("reload_weapon");
         }
         if (weapon)
@@ -91,7 +94,7 @@ public class ReloadWeapon : MonoBehaviour
             Destroy(magazineHand);
         }
         weapon.ammoCount = weapon.ClipSize;
-        isReloading = false;
+        SetReloading(false);
         rigController.ResetTrigger("reload_weapon");
         ammoWidget.Refresh(weapon.ammoCount, weapon.ClipSize, weapon.WeaponSlotType.ToString());
     }
@@ -108,12 +111,93 @@ public class ReloadWeapon : MonoBehaviour
             return false;
         }
 
-        AnimatorStateInfo currentState = rigController.GetCurrentAnimatorStateInfo(0);
-        AnimatorStateInfo nextState = rigController.GetNextAnimatorStateInfo(0);
-        bool animatorReloading = currentState.IsTag("Reload") || currentState.IsName("Weapon_Reload_" + weapon.WeaponSlotType)
-            || (rigController.IsInTransition(0) && (nextState.IsTag("Reload") || nextState.IsName("Weapon_Reload_" + weapon.WeaponSlotType)));
+        bool animatorReloading = IsAnimatorInReloadState();
 
         return !animatorReloading;
+    }
+
+    public bool IsAnimatorInReloadState()
+    {
+        if (rigController == null)
+        {
+            return false;
+        }
+
+        for (int layer = 0; layer < rigController.layerCount; layer++)
+        {
+            AnimatorStateInfo currentState = rigController.GetCurrentAnimatorStateInfo(layer);
+            if (currentState.IsTag("Reload") || currentState.IsName("Weapon_Reload_" + activeWeapon.GetActiveWeapon()?.WeaponSlotType))
+            {
+                return true;
+            }
+
+            if (rigController.IsInTransition(layer))
+            {
+                AnimatorStateInfo nextState = rigController.GetNextAnimatorStateInfo(layer);
+                if (nextState.IsTag("Reload") || nextState.IsName("Weapon_Reload_" + activeWeapon.GetActiveWeapon()?.WeaponSlotType))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void SetReloading(bool value)
+    {
+        if (isReloading == value)
+        {
+            return;
+        }
+
+        isReloading = value;
+        SyncReloadAnimatorLocks(value);
+        ReloadStateChanged?.Invoke(isReloading);
+    }
+
+    private void SyncReloadAnimatorLocks(bool reloading)
+    {
+        if (rigController == null)
+        {
+            return;
+        }
+
+        if (HasAnimatorParameter(rigController, ReloadLockLayersParam, AnimatorControllerParameterType.Bool))
+        {
+            rigController.SetBool(ReloadLockLayersParam, reloading);
+        }
+
+        if (reloading)
+        {
+            if (HasAnimatorParameter(rigController, "ConstrainAxe", AnimatorControllerParameterType.Bool))
+            {
+                rigController.SetBool("ConstrainAxe", false);
+            }
+
+            if (HasAnimatorParameter(rigController, "ConstrainKnife", AnimatorControllerParameterType.Bool))
+            {
+                rigController.SetBool("ConstrainKnife", false);
+            }
+        }
+    }
+
+    private bool HasAnimatorParameter(Animator animator, string parameterName, AnimatorControllerParameterType expectedType)
+    {
+        if (animator == null || string.IsNullOrEmpty(parameterName))
+        {
+            return false;
+        }
+
+        foreach (var parameter in animator.parameters)
+        {
+            if (parameter.name == parameterName && parameter.type == expectedType)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void Refillagazine()
