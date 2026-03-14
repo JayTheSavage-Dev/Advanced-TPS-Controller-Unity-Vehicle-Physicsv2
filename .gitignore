@@ -14,7 +14,7 @@ sysinfo.txt
 *.pidb.meta
 
 ###
-# VS/MD solution and project filess
+# VS/MD solution and project files
 ###
 [Ee]xportedObj/
 *.booproj
