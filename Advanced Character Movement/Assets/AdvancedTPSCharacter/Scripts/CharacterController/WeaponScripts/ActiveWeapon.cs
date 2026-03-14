@@ -206,7 +206,7 @@ public class ActiveWeapon : MonoBehaviour
             TPSLocomotion.SetLayerWeight(0, 1f);
             TPSLocomotion.SetLayerWeight(1, 0f);
             TPSLocomotion.SetLayerWeight(2, 0f);
-            rigController.Play("Weapon_Unarmed");
+            SafePlayRigState("Weapon_Unarmed");
             activeWeaponIndex = 0;
             return;
         }
@@ -305,7 +305,7 @@ public class ActiveWeapon : MonoBehaviour
     {
         var controller = FindObjectOfType<UIController>();
         if (controller.CancelAllMovement == true) { return; }
-        rigController.ResetTrigger("reload_Weapon");
+        SafeResetReloadTrigger();
         WasHolstered = HolsteredWeapon;
         SetHolstered();
         int weaponSlotIndex = (int)newWeapon.WeaponSlotType;
@@ -385,14 +385,14 @@ public class ActiveWeapon : MonoBehaviour
     }
     IEnumerator SwitchWeapon(int holsterindex, int activeindex)
     {
-        rigController.ResetTrigger("reload_Weapon");
+        SafeResetReloadTrigger();
         activeWeaponIndex = activeindex;
         yield return StartCoroutine(HolsterWeapon(holsterindex));
         yield return StartCoroutine(ActivateWeapon(activeindex));
     }
     IEnumerator HolsterWeapon(int index)
     {
-        rigController.ResetTrigger("reload_Weapon");
+        SafeResetReloadTrigger();
         HolsteredWeapon = true;
         var weapon = GetWeapon(index);
         rigController.SetBool("Holster_Weapon", true);
@@ -412,7 +412,7 @@ public class ActiveWeapon : MonoBehaviour
     }
     IEnumerator ActivateWeapon(int index)
     {
-        rigController.ResetTrigger("reload_Weapon");
+        SafeResetReloadTrigger();
         SetHolstered();
         WasHolstered = HolsteredWeapon;
         var weapon = GetWeapon(index);
@@ -423,7 +423,7 @@ public class ActiveWeapon : MonoBehaviour
         if (weapon)
         {
             rigController.SetBool("Holster_Weapon", false);
-            rigController.Play("equip_" + weapon.WeaponSlotType);
+            SafePlayRigState("equip_" + weapon.WeaponSlotType);
             do
             {
                 yield return new WaitForEndOfFrame();
@@ -431,6 +431,50 @@ public class ActiveWeapon : MonoBehaviour
         }
         HolsteredWeapon = false;
     }
+    private bool HasAnimatorParameter(Animator animator, string parameterName, AnimatorControllerParameterType expectedType)
+    {
+        if (animator == null || string.IsNullOrEmpty(parameterName))
+        {
+            return false;
+        }
+
+        foreach (var parameter in animator.parameters)
+        {
+            if (parameter.name == parameterName && parameter.type == expectedType)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void SafeResetReloadTrigger()
+    {
+        if (HasAnimatorParameter(rigController, "reload_weapon", AnimatorControllerParameterType.Trigger))
+        {
+            rigController.ResetTrigger("reload_weapon");
+        }
+    }
+
+    private void SafePlayRigState(string stateName)
+    {
+        if (rigController == null || string.IsNullOrEmpty(stateName))
+        {
+            return;
+        }
+
+        int stateHash = Animator.StringToHash(stateName);
+        for (int layer = 0; layer < rigController.layerCount; layer++)
+        {
+            if (rigController.HasState(layer, stateHash))
+            {
+                rigController.Play(stateHash, layer, 0f);
+                return;
+            }
+        }
+    }
+
     void StartPunchAttack(float combo)
     {
         TPSLocomotion.SetFloat("PunchSide", combo);
