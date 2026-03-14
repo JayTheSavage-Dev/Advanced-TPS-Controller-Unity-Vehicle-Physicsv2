@@ -995,7 +995,7 @@ AnimatorController:
   - serializedVersion: 5
     m_Name: RecoilLayer
     m_StateMachine: {fileID: -1527546314280439001}
-    m_Mask: {fileID: 0}
+    m_Mask: {fileID: 31900000, guid: d9ef10314b3c4334a74b249ba29e26fb, type: 2}
     m_Motions: []
     m_Behaviours: []
     m_BlendingMode: 0
