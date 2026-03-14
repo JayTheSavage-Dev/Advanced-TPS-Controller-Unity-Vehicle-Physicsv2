@@ -2,9 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if UNITY_6000_0_OR_NEWER
+using CM = Unity.Cinemachine;
+#else
+using CM = Cinemachine;
+#endif
+
 public class WeaponAiming : MonoBehaviour
 {
-    private Cinemachine.CinemachineFreeLook cam;
+    private CM.CinemachineFreeLook cam;
     private PlayerControls controls;
     bool Aiming = false;
     float currentFOV;
@@ -15,12 +21,15 @@ public class WeaponAiming : MonoBehaviour
     private void Start()
     {
         Aiming = false;
-        cam = FindFirstObjectByType<Cinemachine.CinemachineFreeLook>();
-        currentFOV = cam.m_Lens.FieldOfView;
-        standardFOV = cam.m_Lens.FieldOfView;
-        currentFOV = 50;
-        standardFOV = 51;
-        cam.m_Lens.FieldOfView = currentFOV;
+        cam = FindFirstObjectByType<CM.CinemachineFreeLook>();
+        if (cam != null)
+        {
+            currentFOV = cam.m_Lens.FieldOfView;
+            standardFOV = cam.m_Lens.FieldOfView;
+            currentFOV = 50;
+            standardFOV = 51;
+            cam.m_Lens.FieldOfView = currentFOV;
+        }
         controls = InputManager.inputActions ?? new PlayerControls();
         controls.Enable();
         controls.Keyboard.Aim.started += ctx =>
