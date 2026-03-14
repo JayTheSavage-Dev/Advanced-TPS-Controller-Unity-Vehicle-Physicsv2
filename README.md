@@ -27,3 +27,12 @@ If in doubt join the discord to get feedback, help, and showcase your work!!
 https://discord.gg/EHmvZGAX
 We hope you enjoy the product and use it in your future creations with Unity!!!
 Advanced TPS Controller Unity Package, for the community use.
+
+## Unity 6 compatibility
+This repository has been updated for Unity 6 (6000.0.x).
+
+- Project version has been moved to Unity 6.
+- Legacy/deprecated package dependencies were removed from `Packages/manifest.json`.
+- Core package versions were updated to Unity 6-compatible releases.
+
+If Unity prompts to reimport assets after upgrade, allow the full reimport once and then reopen the project.
