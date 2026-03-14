@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class ReloadWeapon : MonoBehaviour
 {
@@ -29,23 +30,50 @@ public class ReloadWeapon : MonoBehaviour
     private bool isReloading;
     public bool IsReloading => isReloading;
     public event Action<bool> ReloadStateChanged;
-    private void Start()
+    private void Awake()
     {
         InitializeDefaultReloadPoseOverrides();
         activeWeapon = GetComponent<ActiveWeapon>();
-        animationEvents.WeaponAnimationEvent.AddListener(OnAnimationEvent);
-        Controls = InputManager.inputActions ?? new PlayerControls();
-        Controls.Enable();
-        Controls.Keyboard.Reload.performed += ctx =>
+        Controls = InputManager.Actions;
+    }
+
+    private void OnEnable()
+    {
+        if (animationEvents != null)
         {
-            GunController weapon = activeWeapon.GetActiveWeapon();
-            if (CanTriggerReload(weapon))
-            {
-                weapon.StopFiring();
-                SetReloading(true);
-                rigController.SetTrigger("reload_weapon");
-            }
-        };
+            animationEvents.WeaponAnimationEvent.AddListener(OnAnimationEvent);
+        }
+
+        Controls.Enable();
+        Controls.Keyboard.Reload.performed += OnReloadPerformed;
+    }
+
+    private void OnDisable()
+    {
+        if (animationEvents != null)
+        {
+            animationEvents.WeaponAnimationEvent.RemoveListener(OnAnimationEvent);
+        }
+
+        if (Controls == null)
+        {
+            return;
+        }
+
+        Controls.Keyboard.Reload.performed -= OnReloadPerformed;
+    }
+
+    private void OnReloadPerformed(InputAction.CallbackContext ctx)
+    {
+        GunController weapon = activeWeapon.GetActiveWeapon();
+        if (!CanTriggerReload(weapon))
+        {
+            return;
+        }
+
+        weapon.StopFiring();
+        SetReloading(true);
+        rigController.SetTrigger("reload_weapon");
     }
     private void Update()
     {

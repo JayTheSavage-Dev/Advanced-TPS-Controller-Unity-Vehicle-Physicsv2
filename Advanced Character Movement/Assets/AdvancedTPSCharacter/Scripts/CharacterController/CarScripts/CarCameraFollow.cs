@@ -11,15 +11,32 @@ public class CarCameraFollow : MonoBehaviour
     [SerializeField] private float translateSpeed;
     private PlayerControls Controls;
     [SerializeField] private float rotationSpeed;
-    private void Start()
+
+    private void Awake()
     {
-        Controls = new PlayerControls();
+        Controls = InputManager.Actions;
+    }
+
+    private void OnEnable()
+    {
         Controls.Enable();
-        Controls.Car.ToggleView.performed += ctx =>
+        Controls.Car.ToggleView.performed += OnToggleViewPerformed;
+    }
+
+    private void OnDisable()
+    {
+        if (Controls == null)
         {
-            if(transform.parent.gameObject.GetComponentInChildren<CarController>().carState == CarState.NotOccupied) { return; }
-            ToggleView();
-        };
+            return;
+        }
+
+        Controls.Car.ToggleView.performed -= OnToggleViewPerformed;
+    }
+
+    private void OnToggleViewPerformed(InputAction.CallbackContext ctx)
+    {
+        if(transform.parent.gameObject.GetComponentInChildren<CarController>().carState == CarState.NotOccupied) { return; }
+        ToggleView();
     }
     private void FixedUpdate()
     {

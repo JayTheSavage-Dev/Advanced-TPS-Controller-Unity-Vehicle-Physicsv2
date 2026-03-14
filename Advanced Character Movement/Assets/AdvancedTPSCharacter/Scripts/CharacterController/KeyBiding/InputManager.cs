@@ -9,19 +9,41 @@ using System;
 public class InputManager : MonoBehaviour
 {
     public static PlayerControls inputActions;
+    private static bool bindingOverridesLoaded;
     public static event Action rebindComplete;
     public static event Action rebindCanceled;
     public static event Action<InputAction, int> rebindStarted;
 
     private void Awake()
     {
+        EnsureInputActions();
+    }
+
+    public static PlayerControls Actions => EnsureInputActions();
+
+    public static PlayerControls EnsureInputActions()
+    {
         if (inputActions == null)
+        {
             inputActions = new PlayerControls();
+        }
+
+        if (!bindingOverridesLoaded)
+        {
+            foreach (InputAction action in inputActions.asset)
+            {
+                ApplyBindingOverrides(action);
+            }
+
+            bindingOverridesLoaded = true;
+        }
+
+        return inputActions;
     }
 
     public static void StartRebind(string actionName, int bindingIndex, TMPro.TextMeshProUGUI statusText, bool excludeMouse)
     {
-        InputAction action = inputActions.asset.FindAction(actionName);
+        InputAction action = EnsureInputActions().asset.FindAction(actionName);
         if (action == null || action.bindings.Count <= bindingIndex)
         {
             Debug.Log("Couldn't find action or binding");
@@ -77,11 +99,7 @@ public class InputManager : MonoBehaviour
     }
     public static string GetBindingName(string actionName, int bindingIndex)
     {
-        if(inputActions == null)
-        {
-            inputActions = new PlayerControls();
-        }
-        InputAction action = inputActions.asset.FindAction(actionName);
+        InputAction action = EnsureInputActions().asset.FindAction(actionName);
         return action.GetBindingDisplayString(bindingIndex);
     }
 
@@ -94,11 +112,22 @@ public class InputManager : MonoBehaviour
     }
     public static void LoadBindingOverride(string actionName)
     {
-        if(inputActions == null)
+        InputAction action = EnsureInputActions().asset.FindAction(actionName);
+        if (action == null)
         {
-            inputActions = new PlayerControls();
+            return;
         }
-        InputAction action = inputActions.asset.FindAction(actionName);
+
+        ApplyBindingOverrides(action);
+    }
+
+    private static void ApplyBindingOverrides(InputAction action)
+    {
+        if (action == null)
+        {
+            return;
+        }
+
         for(int i = 0; i < action.bindings.Count; i++)
         {
             if (!string.IsNullOrEmpty(PlayerPrefs.GetString(action.actionMap + action.name + i, action.bindings[i].overridePath)))
@@ -109,7 +138,7 @@ public class InputManager : MonoBehaviour
     }
     public static void ResetBinding(string actionName, int bindingIndex)
     {
-        InputAction action = inputActions.asset.FindAction(actionName);
+        InputAction action = EnsureInputActions().asset.FindAction(actionName);
         if(action == null || action.bindings.Count <= bindingIndex)
         {
             Debug.Log("Could not find action or binding");
@@ -128,4 +157,3 @@ public class InputManager : MonoBehaviour
         }
     }
 }
-

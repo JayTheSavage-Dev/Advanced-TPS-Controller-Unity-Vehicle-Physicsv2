@@ -50,83 +50,133 @@ public class AdvancedCharacterMovement : MonoBehaviour
     [SerializeField] private GameObject CameraLookAtOffset;
     private Vector3 CameraLookAtOffsetVector;
     private PlayerHealth playerHealth;
-    private void Start()
+    private void Awake()
     {
-        widget = transform.parent.gameObject.GetComponentInChildren<AmmoWidget>();
+        if (transform.parent != null)
+        {
+            widget = transform.parent.gameObject.GetComponentInChildren<AmmoWidget>();
+        }
+
         state = CharacterState.Normal;
         weapon = GetComponent<ActiveWeapon>();
-        //Enabling Input Asset
         animator = GetComponent<Animator>();
         controller = GetComponentInChildren<UIController>();
-        Controls = InputManager.inputActions;
-        CacheAnimatorParameters();
-        Controls.Enable();
-        Controls.Keyboard.MovementKeyBinds.performed += ctx =>
-        {
-            PlayerMoveInput = new Vector3(ctx.ReadValue<Vector2>().x, PlayerMoveInput.y, ctx.ReadValue<Vector2>().y);
-        };
-        Controls.Keyboard.MovementKeyBinds.canceled += ctx =>
-        {
-            PlayerMoveInput = new Vector3(ctx.ReadValue<Vector2>().x, PlayerMoveInput.y, ctx.ReadValue<Vector2>().y);
-        };
-        Controls.Keyboard.Aim.started += ctx =>
-        {
-            int index = weapon.activeWeaponIndex;
-            GunController weaponUsing = weapon.GetWeapon(index);
-            if (weaponUsing == null) { return; }
-            aiming = true;
-        };
-        Controls.Keyboard.Aim.canceled += ctx =>
-        {
-            int index = weapon.activeWeaponIndex;
-            GunController weaponUsing = weapon.GetWeapon(index);
-            if (weaponUsing == null) { return; }
-            aiming = false;
-        };
-        Controls.Keyboard.Sprint.performed += ctx =>
-        {
-            if (aiming) { running = false; return; }
-            running = true;
-        };
-        Controls.Keyboard.Sprint.canceled += ctx =>
-        {
-            if (aiming) { running = false; return; }
-            running = false;
-        };
-        Controls.Keyboard.Crouch.performed += ctx =>
-        {
-            crouching = !crouching;
-        };
-        Controls.Keyboard.Jump.performed += ctx =>
-        {
-            if (!Controller.isGrounded) { return; }
-            if (state == CharacterState.Vehicle) { return; }
-            if (controller.CancelAllMovement) { return; }
-            if (weapon.CancelAllMovement) { return; }
-            if (Time.time < lastJumpTime + jumpCooldown) { return; }
-            jumping = true;
-        };
-        Controls.Keyboard.Equip.performed += ctx =>
-        {
-            if (state == CharacterState.Normal)
-            {
-                EnterOrEquipVehicle();
-            }
-        };
-        Controls.Car.ExitVehicle.performed += ctx =>
-        {
-            if (state == CharacterState.Vehicle)
-            {
-                ExitOrLeaveVehicle();
-            }
-        };
+        Controls = InputManager.Actions;
         Controller = GetComponent<CharacterController>();
+
+        CacheAnimatorParameters();
+
         playerHealth = GetComponent<PlayerHealth>();
         if (playerHealth == null)
         {
             playerHealth = gameObject.AddComponent<PlayerHealth>();
         }
     }
+
+    private void OnEnable()
+    {
+        Controls.Enable();
+        Controls.Keyboard.MovementKeyBinds.performed += OnMovementPerformed;
+        Controls.Keyboard.MovementKeyBinds.canceled += OnMovementPerformed;
+        Controls.Keyboard.Aim.started += OnAimStarted;
+        Controls.Keyboard.Aim.canceled += OnAimCanceled;
+        Controls.Keyboard.Sprint.performed += OnSprintPerformed;
+        Controls.Keyboard.Sprint.canceled += OnSprintCanceled;
+        Controls.Keyboard.Crouch.performed += OnCrouchPerformed;
+        Controls.Keyboard.Jump.performed += OnJumpPerformed;
+        Controls.Keyboard.Equip.performed += OnEquipPerformed;
+        Controls.Car.ExitVehicle.performed += OnExitVehiclePerformed;
+    }
+
+    private void OnDisable()
+    {
+        if (Controls == null)
+        {
+            return;
+        }
+
+        Controls.Keyboard.MovementKeyBinds.performed -= OnMovementPerformed;
+        Controls.Keyboard.MovementKeyBinds.canceled -= OnMovementPerformed;
+        Controls.Keyboard.Aim.started -= OnAimStarted;
+        Controls.Keyboard.Aim.canceled -= OnAimCanceled;
+        Controls.Keyboard.Sprint.performed -= OnSprintPerformed;
+        Controls.Keyboard.Sprint.canceled -= OnSprintCanceled;
+        Controls.Keyboard.Crouch.performed -= OnCrouchPerformed;
+        Controls.Keyboard.Jump.performed -= OnJumpPerformed;
+        Controls.Keyboard.Equip.performed -= OnEquipPerformed;
+        Controls.Car.ExitVehicle.performed -= OnExitVehiclePerformed;
+    }
+
+    private void OnMovementPerformed(InputAction.CallbackContext ctx)
+    {
+        Vector2 movement = ctx.ReadValue<Vector2>();
+        PlayerMoveInput = new Vector3(movement.x, PlayerMoveInput.y, movement.y);
+    }
+
+    private void OnAimStarted(InputAction.CallbackContext ctx)
+    {
+        int index = weapon.activeWeaponIndex;
+        GunController weaponUsing = weapon.GetWeapon(index);
+        if (weaponUsing == null) { return; }
+        aiming = true;
+    }
+
+    private void OnAimCanceled(InputAction.CallbackContext ctx)
+    {
+        int index = weapon.activeWeaponIndex;
+        GunController weaponUsing = weapon.GetWeapon(index);
+        if (weaponUsing == null) { return; }
+        aiming = false;
+    }
+
+    private void OnSprintPerformed(InputAction.CallbackContext ctx)
+    {
+        if (aiming) { running = false; return; }
+        running = true;
+    }
+
+    private void OnSprintCanceled(InputAction.CallbackContext ctx)
+    {
+        if (aiming) { running = false; return; }
+        running = false;
+    }
+
+    private void OnCrouchPerformed(InputAction.CallbackContext ctx)
+    {
+        crouching = !crouching;
+    }
+
+    private bool IsMovementBlocked()
+    {
+        return state == CharacterState.Vehicle
+            || (controller != null && controller.CancelAllMovement)
+            || (weapon != null && weapon.CancelAllMovement);
+    }
+
+    private void OnJumpPerformed(InputAction.CallbackContext ctx)
+    {
+        if (!Controller.isGrounded) { return; }
+        if (IsMovementBlocked()) { return; }
+        if (Time.time < lastJumpTime + jumpCooldown) { return; }
+        jumping = true;
+    }
+
+    private void OnEquipPerformed(InputAction.CallbackContext ctx)
+    {
+        if (state == CharacterState.Normal)
+        {
+            EnterOrEquipVehicle();
+        }
+    }
+
+    private void OnExitVehiclePerformed(InputAction.CallbackContext ctx)
+    {
+        if (state == CharacterState.Vehicle)
+        {
+            ExitOrLeaveVehicle();
+        }
+    }
+
     private void CacheAnimatorParameters()
     {
         hasGroundedParameter = AnimatorHasParameter("Grounded", AnimatorControllerParameterType.Bool);

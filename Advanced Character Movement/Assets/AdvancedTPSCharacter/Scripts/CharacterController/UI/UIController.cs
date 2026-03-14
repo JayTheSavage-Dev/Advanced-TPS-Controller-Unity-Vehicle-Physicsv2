@@ -13,15 +13,31 @@ public class UIController : MonoBehaviour
     bool Settings;
     [SerializeField] private bool preferUIToolkit = true;
     public bool CancelAllMovement { get; set;}
-    // Start is called before the first frame update
-    void Start()
+
+    private void Awake()
     {
-        Controls = new PlayerControls();
+        Controls = InputManager.Actions;
+    }
+
+    private void OnEnable()
+    {
         Controls.Enable();
-        Controls.Keyboard.Escape.performed += ctx =>
+        Controls.Keyboard.Escape.performed += OnEscapePerformed;
+    }
+
+    private void OnDisable()
+    {
+        if (Controls == null)
         {
-            Settings = !Settings;
-        };
+            return;
+        }
+
+        Controls.Keyboard.Escape.performed -= OnEscapePerformed;
+    }
+
+    private void OnEscapePerformed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        Settings = !Settings;
     }
 
     private void Update()

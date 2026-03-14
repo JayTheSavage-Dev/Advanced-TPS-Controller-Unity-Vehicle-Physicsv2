@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 using CM = Cinemachine;
 
@@ -35,127 +36,34 @@ public class ActiveWeapon : MonoBehaviour
     public TrailRenderer tracerRenderer;
     public AmmoWidget ammoWidget;
     WeaponAiming aiming;
+    private AdvancedCharacterMovement movement;
+    private UIController uiController;
     [SerializeField] private CM.CinemachineFreeLook playerCamera;
     public bool CancelAllMovement { get; set; }
     float punchcombo;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         punchcombo = 0;
         aiming = GetComponent<WeaponAiming>();
+        movement = GetComponent<AdvancedCharacterMovement>();
+        uiController = GetComponentInChildren<UIController>();
         activeWeaponIndex = 0;
         TPSLocomotion = GetComponent<Animator>();
         HolsteredWeapon = false;
-        Controls = InputManager.inputActions;
+        Controls = InputManager.Actions;
+    }
+
+    private void OnEnable()
+    {
         Controls.Enable();
-        Controls.Keyboard.HolsterEquip.performed += ctx =>
-        {
-            if (GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
-            var controller = FindFirstObjectByType<UIController>();
-            if (controller.CancelAllMovement == true) { return; }
-                bool isHolstered = rigController.GetBool("Holster_Weapon");
-                HolsteredWeapon = !isHolstered;
-                rigController.SetBool("Holster_Weapon", HolsteredWeapon);
-        };
-        Controls.Keyboard.MoveThrough.performed += ctx =>
-            {
-                if (GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
-                var controller = FindFirstObjectByType<UIController>();
-                if (controller.CancelAllMovement == true) { return; }
-                int x = 0;
-                for (int i = activeWeaponIndex; i < Equipped_Weapons.Length + 1; i++)
-                {
-                    x++;
-                    if (i == Equipped_Weapons.Length) { i = 0; }
-                    if (Equipped_Weapons[i] != null && i != activeWeaponIndex)
-                    {
-                        SetActiveWeapon((WeaponSlot)i);
-                        return;
-                    }
-                    if (x == Equipped_Weapons.Length) { return; }
-                }
-            };
-        Controls.Keyboard.MoveBack.performed += ctx =>
-            {
-                if (GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
-                var controller = FindFirstObjectByType<UIController>();
-                if (controller.CancelAllMovement == true) { return; }
-                int x = 0;
-                for (int i = activeWeaponIndex; i > -2; i--)
-                {
-                    x++;
-                    if (i == -1) { i = Equipped_Weapons.Length - 1; }
-                    if (Equipped_Weapons[i] != null && i != activeWeaponIndex)
-                    {
-                        SetActiveWeapon((WeaponSlot)i);
-                        return;
-                    }
-                    if (x == Equipped_Weapons.Length) { return; }
-                }
-            };
-        Controls.Keyboard.RemoveWeapon.performed += ctx =>
-            {
-                if (GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
-                var controller = FindFirstObjectByType<UIController>();
-                if (controller.CancelAllMovement == true) { return; }
-                RemoveWeaponCurrent = true;
-            };
-        Controls.Keyboard.Shoot.started += ctx =>
-         {
-                if(GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
-                GetComponent<AdvancedCharacterMovement>().IsRunning = false;
-                var controller = FindFirstObjectByType<UIController>();
-                if (controller.CancelAllMovement == true) { return; }
-                if (FindFirstObjectByType<UIController>().CancelAllMovement == true) { return; }
-                if (currentWeapon != null && !HolsteredWeapon)
-                {
-                    if (currentWeapon.WeaponSlotType.ToString() == "Axe")
-                    {
-                     if(GetComponent<AdvancedCharacterMovement>().Crouched == true) { return; }
-                        if (currentWeapon.AxeAttack == true) return;
-                        currentWeapon.StartAxeAttack(TPSLocomotion, rigController);
-                    }
-                    else if (currentWeapon.WeaponSlotType.ToString() != "Knife")
-                    {
-                        currentWeapon.StartFiring();
-                    }
-                    else if (currentWeapon.WeaponSlotType.ToString() == "Knife")
-                    {
-                        currentWeapon.KnifeAttack(TPSLocomotion, rigController);
-                    }
-                }
-                else if (currentWeapon != null && HolsteredWeapon || currentWeapon == null)
-                {
-                    if (punchcombo == 0)
-                    {
-                        punchcombo = 1;
-                        StartPunchAttack(punchcombo);
-                    }
-                    else if (punchcombo == 1)
-                    {
-                        punchcombo = 2;
-                        StartPunchAttack(punchcombo);
-                    }
-                    else if (punchcombo == 2)
-                    {
-                        punchcombo = 1;
-                        StartPunchAttack(punchcombo);
-                    }
-                }
-            };
-        Controls.Keyboard.Shoot.canceled += ctx =>
-            {
-                if (GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
-                var controller = FindFirstObjectByType<UIController>();
-                if (controller.CancelAllMovement == true) { return; }
-                if (FindFirstObjectByType<UIController>().CancelAllMovement == true) { return; }
-                if (HolsteredWeapon) { return; }
-                if (currentWeapon != null)
-                {
-                    if (currentWeapon.WeaponSlotType.ToString() == "Axe") { return; }
-                    currentWeapon.StopFiring();
-                }
-            };
+        Controls.Keyboard.HolsterEquip.performed += OnHolsterPerformed;
+        Controls.Keyboard.MoveThrough.performed += OnMoveThroughPerformed;
+        Controls.Keyboard.MoveBack.performed += OnMoveBackPerformed;
+        Controls.Keyboard.RemoveWeapon.performed += OnRemoveWeaponPerformed;
+        Controls.Keyboard.Shoot.started += OnShootStarted;
+        Controls.Keyboard.Shoot.canceled += OnShootCanceled;
+
         rigController.updateMode = AnimatorUpdateMode.Fixed;
         rigController.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
         rigController.cullingMode = AnimatorCullingMode.AlwaysAnimate;
@@ -163,6 +71,133 @@ public class ActiveWeapon : MonoBehaviour
         GunController exsistingWeapon = GetComponentInChildren<GunController>();
         if (exsistingWeapon)
             Equip(exsistingWeapon, true);
+    }
+
+    private void OnDisable()
+    {
+        if (Controls == null)
+        {
+            return;
+        }
+
+        Controls.Keyboard.HolsterEquip.performed -= OnHolsterPerformed;
+        Controls.Keyboard.MoveThrough.performed -= OnMoveThroughPerformed;
+        Controls.Keyboard.MoveBack.performed -= OnMoveBackPerformed;
+        Controls.Keyboard.RemoveWeapon.performed -= OnRemoveWeaponPerformed;
+        Controls.Keyboard.Shoot.started -= OnShootStarted;
+        Controls.Keyboard.Shoot.canceled -= OnShootCanceled;
+    }
+
+    private bool IsWeaponInputBlocked()
+    {
+        return movement == null
+            || movement.state == CharacterState.Vehicle
+            || (uiController != null && uiController.CancelAllMovement);
+    }
+
+    private void OnHolsterPerformed(InputAction.CallbackContext ctx)
+    {
+        if (IsWeaponInputBlocked()) { return; }
+
+        bool isHolstered = rigController.GetBool("Holster_Weapon");
+        HolsteredWeapon = !isHolstered;
+        rigController.SetBool("Holster_Weapon", HolsteredWeapon);
+    }
+
+    private void OnMoveThroughPerformed(InputAction.CallbackContext ctx)
+    {
+        if (IsWeaponInputBlocked()) { return; }
+
+        int x = 0;
+        for (int i = activeWeaponIndex; i < Equipped_Weapons.Length + 1; i++)
+        {
+            x++;
+            if (i == Equipped_Weapons.Length) { i = 0; }
+            if (Equipped_Weapons[i] != null && i != activeWeaponIndex)
+            {
+                SetActiveWeapon((WeaponSlot)i);
+                return;
+            }
+            if (x == Equipped_Weapons.Length) { return; }
+        }
+    }
+
+    private void OnMoveBackPerformed(InputAction.CallbackContext ctx)
+    {
+        if (IsWeaponInputBlocked()) { return; }
+
+        int x = 0;
+        for (int i = activeWeaponIndex; i > -2; i--)
+        {
+            x++;
+            if (i == -1) { i = Equipped_Weapons.Length - 1; }
+            if (Equipped_Weapons[i] != null && i != activeWeaponIndex)
+            {
+                SetActiveWeapon((WeaponSlot)i);
+                return;
+            }
+            if (x == Equipped_Weapons.Length) { return; }
+        }
+    }
+
+    private void OnRemoveWeaponPerformed(InputAction.CallbackContext ctx)
+    {
+        if (IsWeaponInputBlocked()) { return; }
+        RemoveWeaponCurrent = true;
+    }
+
+    private void OnShootStarted(InputAction.CallbackContext ctx)
+    {
+        if (IsWeaponInputBlocked()) { return; }
+
+        movement.IsRunning = false;
+
+        if (currentWeapon != null && !HolsteredWeapon)
+        {
+            if (currentWeapon.WeaponSlotType.ToString() == "Axe")
+            {
+                if (movement.Crouched) { return; }
+                if (currentWeapon.AxeAttack) { return; }
+                currentWeapon.StartAxeAttack(TPSLocomotion, rigController);
+            }
+            else if (currentWeapon.WeaponSlotType.ToString() != "Knife")
+            {
+                currentWeapon.StartFiring();
+            }
+            else
+            {
+                currentWeapon.KnifeAttack(TPSLocomotion, rigController);
+            }
+
+            return;
+        }
+
+        if (punchcombo == 0)
+        {
+            punchcombo = 1;
+            StartPunchAttack(punchcombo);
+        }
+        else if (punchcombo == 1)
+        {
+            punchcombo = 2;
+            StartPunchAttack(punchcombo);
+        }
+        else
+        {
+            punchcombo = 1;
+            StartPunchAttack(punchcombo);
+        }
+    }
+
+    private void OnShootCanceled(InputAction.CallbackContext ctx)
+    {
+        if (IsWeaponInputBlocked() || HolsteredWeapon || currentWeapon == null)
+        {
+            return;
+        }
+
+        if (currentWeapon.WeaponSlotType.ToString() == "Axe") { return; }
+        currentWeapon.StopFiring();
     }
     void SetHolstered()
     {
@@ -303,8 +338,7 @@ public class ActiveWeapon : MonoBehaviour
     }
     public void Equip(GunController newWeapon, bool destroy)
     {
-        var controller = FindFirstObjectByType<UIController>();
-        if (controller.CancelAllMovement == true) { return; }
+        if (uiController != null && uiController.CancelAllMovement) { return; }
         SafeResetReloadTrigger();
         WasHolstered = HolsteredWeapon;
         SetHolstered();
