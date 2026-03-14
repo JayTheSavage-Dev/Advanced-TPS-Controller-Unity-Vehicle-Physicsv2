@@ -11,6 +11,7 @@ public class UIController : MonoBehaviour
     [SerializeField]
     private GameObject removecam;
     bool Settings;
+    [SerializeField] private bool preferUIToolkit = true;
     public bool CancelAllMovement { get; set;}
     // Start is called before the first frame update
     void Start()
@@ -27,13 +28,19 @@ public class UIController : MonoBehaviour
     {
         HandleOpenMenu();
     }
+
+    private bool UseUIToolkitOnly()
+    {
+        return preferUIToolkit && UIToolkitUIBridge.Instance != null;
+    }
+
     private void HandleOpenMenu()
     {
         if (Settings)
         {
             if (RebindingUI != null)
             {
-                RebindingUI.SetActive(true);
+                RebindingUI.SetActive(!UseUIToolkitOnly());
             }
 
             if (removecam != null)
