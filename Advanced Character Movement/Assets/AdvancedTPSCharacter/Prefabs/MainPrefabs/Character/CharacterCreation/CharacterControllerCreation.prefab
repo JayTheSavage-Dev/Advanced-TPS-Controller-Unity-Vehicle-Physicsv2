@@ -3711,7 +3711,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rigController: {fileID: 3708691404528488112}
   animationEvents: {fileID: 1595149506436856691}
-  lefthand: {fileID: 0}
+  lefthand: {fileID: 3630755559775873725}
   ammoWidget: {fileID: 1569365413369914960}
 --- !u!114 &6558020415123751882
 MonoBehaviour:
