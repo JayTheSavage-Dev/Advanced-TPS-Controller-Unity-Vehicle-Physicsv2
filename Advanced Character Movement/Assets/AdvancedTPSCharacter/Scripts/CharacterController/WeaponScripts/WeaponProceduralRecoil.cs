@@ -2,10 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if UNITY_6000_0_OR_NEWER
+using CM = Unity.Cinemachine;
+#else
+using CM = Cinemachine;
+#endif
+
 public class WeaponProceduralRecoil : MonoBehaviour
 {
-    [HideInInspector] public Cinemachine.CinemachineFreeLook playerCamera;
-    [HideInInspector] public Cinemachine.CinemachineImpulseSource cameraShake;
+    [HideInInspector] public CM.CinemachineFreeLook playerCamera;
+    [HideInInspector] public CM.CinemachineImpulseSource cameraShake;
     [HideInInspector] public Animator RigController;
     public float duration;
     public Vector2[] recoilPattern;
@@ -16,7 +22,7 @@ public class WeaponProceduralRecoil : MonoBehaviour
     public float RecoilModifier = 1f;
     private void Awake()
     {
-        cameraShake = GetComponent<Cinemachine.CinemachineImpulseSource>();
+        cameraShake = GetComponent<CM.CinemachineImpulseSource>();
     }
     int NextIndex(int index)
     {
@@ -65,7 +71,7 @@ public class WeaponProceduralRecoil : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(time > 0)
+        if (time > 0 && playerCamera != null)
         {
             playerCamera.m_YAxis.Value -= ((verticalRecoil / 1000 * Time.deltaTime) / duration) * RecoilModifier;
             playerCamera.m_XAxis.Value -= ((HorizontalRecoil / 10 * Time.deltaTime) / duration) * RecoilModifier;

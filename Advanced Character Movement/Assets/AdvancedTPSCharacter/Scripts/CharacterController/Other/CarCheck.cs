@@ -22,19 +22,23 @@ public class CarCheck : MonoBehaviour
             return;
         }
 
-        if (CarCheckUI != null)
+        bool useUIToolkit = UIToolkitUIBridge.Instance != null;
+
+        if (!useUIToolkit && CarCheckUI != null)
         {
             CarCheckUI.SetActive(true);
         }
 
-        if (Crosshair != null)
+        if (!useUIToolkit && Crosshair != null)
         {
             Crosshair.SetActive(false);
         }
 
-        if (UIToolkitUIBridge.Instance != null)
+        if (useUIToolkit)
         {
             UIToolkitUIBridge.Instance.SetVehiclePromptVisible(true);
+            UIToolkitUIBridge.Instance.SetInteractionPromptText("Press E to enter vehicle");
+            UIToolkitUIBridge.Instance.SetInteractionPromptVisible(true);
             UIToolkitUIBridge.Instance.SetCrosshairVisible(false);
         }
 
@@ -49,19 +53,22 @@ public class CarCheck : MonoBehaviour
             return;
         }
 
-        if (CarCheckUI != null)
+        bool useUIToolkit = UIToolkitUIBridge.Instance != null;
+
+        if (!useUIToolkit && CarCheckUI != null)
         {
             CarCheckUI.SetActive(false);
         }
 
-        if (Crosshair != null)
+        if (!useUIToolkit && Crosshair != null)
         {
             Crosshair.SetActive(true);
         }
 
-        if (UIToolkitUIBridge.Instance != null)
+        if (useUIToolkit)
         {
             UIToolkitUIBridge.Instance.SetVehiclePromptVisible(false);
+            UIToolkitUIBridge.Instance.SetInteractionPromptVisible(false);
             UIToolkitUIBridge.Instance.SetCrosshairVisible(true);
         }
 
@@ -76,14 +83,16 @@ public class CarCheck : MonoBehaviour
         carController.Speedometer.SetActive(true);
         CanEnterVehicle = false;
 
-        if (CarCheckUI != null)
+        bool useUIToolkit = UIToolkitUIBridge.Instance != null;
+        if (!useUIToolkit && CarCheckUI != null)
         {
             CarCheckUI.SetActive(false);
         }
 
-        if (UIToolkitUIBridge.Instance != null)
+        if (useUIToolkit)
         {
             UIToolkitUIBridge.Instance.SetVehiclePromptVisible(false);
+            UIToolkitUIBridge.Instance.SetInteractionPromptVisible(false);
         }
 
         if (carController == null) { return; }

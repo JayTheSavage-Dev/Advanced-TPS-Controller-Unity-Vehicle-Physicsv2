@@ -12,14 +12,16 @@ public class WeaponPickup : MonoBehaviour
 
     private void Awake()
     {
-        if (pickupPrompt != null)
+        bool useUIToolkit = UIToolkitUIBridge.Instance != null;
+        if (!useUIToolkit && pickupPrompt != null)
         {
             pickupPrompt.SetActive(false);
         }
 
-        if (UIToolkitUIBridge.Instance != null)
+        if (useUIToolkit)
         {
             UIToolkitUIBridge.Instance.SetPickupPromptVisible(false);
+            UIToolkitUIBridge.Instance.SetInteractionPromptVisible(false);
         }
     }
 
@@ -40,14 +42,16 @@ public class WeaponPickup : MonoBehaviour
             GunController newWeapon = Instantiate(weaponFab);
             activeWeaponInRange.Equip(newWeapon, true);
 
-            if (pickupPrompt != null)
+            bool useUIToolkit = UIToolkitUIBridge.Instance != null;
+            if (!useUIToolkit && pickupPrompt != null)
             {
                 pickupPrompt.SetActive(false);
             }
 
-            if (UIToolkitUIBridge.Instance != null)
+            if (useUIToolkit)
             {
                 UIToolkitUIBridge.Instance.SetPickupPromptVisible(false);
+                UIToolkitUIBridge.Instance.SetInteractionPromptVisible(false);
             }
 
             if (destroyPickupAfterCollect)
@@ -70,15 +74,18 @@ public class WeaponPickup : MonoBehaviour
         }
 
         activeWeaponInRange = activeWeapon;
-        if (pickupPrompt != null)
+        bool useUIToolkit = UIToolkitUIBridge.Instance != null;
+        if (!useUIToolkit && pickupPrompt != null)
         {
             pickupPrompt.SetActive(true);
         }
 
-        if (UIToolkitUIBridge.Instance != null)
+        if (useUIToolkit)
         {
             UIToolkitUIBridge.Instance.SetPickupPromptText(pickupPromptText);
             UIToolkitUIBridge.Instance.SetPickupPromptVisible(true);
+            UIToolkitUIBridge.Instance.SetInteractionPromptText(pickupPromptText);
+            UIToolkitUIBridge.Instance.SetInteractionPromptVisible(true);
         }
     }
 
@@ -91,14 +98,16 @@ public class WeaponPickup : MonoBehaviour
         }
 
         activeWeaponInRange = null;
-        if (pickupPrompt != null)
+        bool useUIToolkit = UIToolkitUIBridge.Instance != null;
+        if (!useUIToolkit && pickupPrompt != null)
         {
             pickupPrompt.SetActive(false);
         }
 
-        if (UIToolkitUIBridge.Instance != null)
+        if (useUIToolkit)
         {
             UIToolkitUIBridge.Instance.SetPickupPromptVisible(false);
+            UIToolkitUIBridge.Instance.SetInteractionPromptVisible(false);
         }
     }
 }

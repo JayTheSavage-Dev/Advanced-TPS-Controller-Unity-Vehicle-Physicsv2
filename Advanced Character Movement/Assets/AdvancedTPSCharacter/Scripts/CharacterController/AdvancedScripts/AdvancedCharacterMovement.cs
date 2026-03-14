@@ -33,6 +33,7 @@ public class AdvancedCharacterMovement : MonoBehaviour
     bool jumpAnimationTriggered;
     bool hasGroundedParameter;
     bool hasVerticalVelocityParameter;
+    [SerializeField] private float animationDampTime = 0.08f;
     float lastJumpTime = Mathf.NegativeInfinity;
     bool aiming;
     public bool Crouched;
@@ -48,6 +49,7 @@ public class AdvancedCharacterMovement : MonoBehaviour
     [SerializeField] private GameObject CameraLookAt;
     [SerializeField] private GameObject CameraLookAtOffset;
     private Vector3 CameraLookAtOffsetVector;
+    private PlayerHealth playerHealth;
     private void Start()
     {
         widget = transform.parent.gameObject.GetComponentInChildren<AmmoWidget>();
@@ -119,6 +121,11 @@ public class AdvancedCharacterMovement : MonoBehaviour
             }
         };
         Controller = GetComponent<CharacterController>();
+        playerHealth = GetComponent<PlayerHealth>();
+        if (playerHealth == null)
+        {
+            playerHealth = gameObject.AddComponent<PlayerHealth>();
+        }
     }
     private void CacheAnimatorParameters()
     {
@@ -278,7 +285,7 @@ public class AdvancedCharacterMovement : MonoBehaviour
 
         if (hasVerticalVelocityParameter)
         {
-            animator.SetFloat("VerticalVelocity", verticalVelocity);
+            animator.SetFloat("VerticalVelocity", verticalVelocity, animationDampTime, Time.deltaTime);
         }
 
         if (weapon.CancelAllMovement == true) { return; }
@@ -337,8 +344,8 @@ public class AdvancedCharacterMovement : MonoBehaviour
                 VelocityX = 0.0f;
             }
             // set the parameters to our local variable values
-            animator.SetFloat("CrouchingVelocityZ", VelocityZ);
-            animator.SetFloat("VelocityX", VelocityX);
+            animator.SetFloat("CrouchingVelocityZ", VelocityZ, animationDampTime, Time.deltaTime);
+            animator.SetFloat("VelocityX", VelocityX, animationDampTime, Time.deltaTime);
         }
         else
         {
@@ -427,8 +434,8 @@ public class AdvancedCharacterMovement : MonoBehaviour
                 VelocityX = 0.0f;
             }
             // set the parameters to our local variable values
-            animator.SetFloat("StandingVelocityZ", VelocityZ);
-            animator.SetFloat("VelocityX", VelocityX);
+            animator.SetFloat("StandingVelocityZ", VelocityZ, animationDampTime, Time.deltaTime);
+            animator.SetFloat("VelocityX", VelocityX, animationDampTime, Time.deltaTime);
         }
     }
     private void HandleCharacterRotation()
@@ -443,7 +450,7 @@ public class AdvancedCharacterMovement : MonoBehaviour
     {
         CarCheck carCheck = GetComponentInChildren<CarCheck>();
         if (carCheck == null) { return; }
-        if (carCheck.CanEnterVehicle == true && carCheck.CarCheckUI.gameObject.activeSelf == true)
+        if (carCheck.CanEnterVehicle)
         {
             Debug.Log("We Can Enter Vehicle");
             carCheck.EnterVehicle();
@@ -503,7 +510,7 @@ public class AdvancedCharacterMovement : MonoBehaviour
     {
         CarCheck carCheck = GetComponentInChildren<CarCheck>();
         if (carCheck == null) { return; }
-        if (carCheck.CanEnterVehicle == false && carCheck.CarCheckUI.gameObject.activeSelf == false)
+        if (!carCheck.CanEnterVehicle)
         {
             carCheck.ExitVehicle();
         }
