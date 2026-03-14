@@ -21,9 +21,3 @@ Customizable toggles, e.g. Hide inventory
 Advanced Car Controller
 Footstep Sounds and Detection System
 Improved Ragdoll and Player Controls
-The Asset Will Soon Be Available On the Store: "Download Link will be inserted 
-here"
-If in doubt join the discord to get feedback, help, and showcase your work!!
-https://discord.gg/EHmvZGAX
-We hope you enjoy the product and use it in your future creations with Unity!!!
-Advanced TPS Controller Unity Package, for the community use.
