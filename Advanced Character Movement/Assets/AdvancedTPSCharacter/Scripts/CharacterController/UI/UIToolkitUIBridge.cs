@@ -8,6 +8,8 @@ public class UIToolkitUIBridge : MonoBehaviour
 
     [Header("UI Toolkit")]
     [SerializeField] private UIDocument uiDocument;
+    [SerializeField] private StyleSheet styleSheet;
+    [SerializeField] private string resourcesStyleSheetPath = "AdvancedTPSUI/TPSHUD";
     [SerializeField] private string ammoLabelName = "ammo-label";
     [SerializeField] private string vehiclePromptName = "vehicle-prompt";
     [SerializeField] private string crosshairName = "crosshair";
@@ -22,10 +24,19 @@ public class UIToolkitUIBridge : MonoBehaviour
     private VisualElement pickupPrompt;
     private Label pickupPromptLabel;
 
+    public void Initialize(UIDocument document)
+    {
+        uiDocument = document;
+        CacheElements();
+    }
+
     private void Awake()
     {
         Instance = this;
         CacheElements();
+        SetVehiclePromptVisible(false);
+        SetPickupPromptVisible(false);
+        SetSettingsVisible(false);
     }
 
     private void OnDestroy()
@@ -49,6 +60,16 @@ public class UIToolkitUIBridge : MonoBehaviour
         }
 
         var root = uiDocument.rootVisualElement;
+        if (styleSheet == null)
+        {
+            styleSheet = Resources.Load<StyleSheet>(resourcesStyleSheetPath);
+        }
+
+        if (styleSheet != null && !root.styleSheets.Contains(styleSheet))
+        {
+            root.styleSheets.Add(styleSheet);
+        }
+
         ammoLabel = root.Q<Label>(ammoLabelName);
         vehiclePrompt = root.Q<VisualElement>(vehiclePromptName);
         crosshair = root.Q<VisualElement>(crosshairName);

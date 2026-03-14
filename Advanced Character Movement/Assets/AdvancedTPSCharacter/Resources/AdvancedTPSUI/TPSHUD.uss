@@ -1,0 +1,64 @@
+#hud-root {
+    position: relative;
+}
+
+.crosshair {
+    width: 10px;
+    height: 10px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: white;
+    border-right-color: white;
+    border-top-color: white;
+    border-bottom-color: white;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -5px;
+    margin-top: -5px;
+}
+
+.ammo-label {
+    position: absolute;
+    right: 24px;
+    bottom: 20px;
+    color: white;
+    font-size: 18px;
+    unity-font-style: bold;
+}
+
+.vehicle-prompt,
+.pickup-prompt {
+    position: absolute;
+    left: 50%;
+    bottom: 50px;
+    margin-left: -120px;
+    min-width: 240px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    unity-text-align: middle-center;
+    display: none;
+}
+
+.settings-panel {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    width: 340px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12px;
+    display: none;
+}
+
+.settings-title {
+    font-size: 18px;
+    unity-font-style: bold;
+    margin-bottom: 8px;
+}
