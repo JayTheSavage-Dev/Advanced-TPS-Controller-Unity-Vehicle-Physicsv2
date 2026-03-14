@@ -16,19 +16,21 @@ public class ReloadWeapon : MonoBehaviour
     {
         activeWeapon = GetComponent<ActiveWeapon>();
         animationEvents.WeaponAnimationEvent.AddListener(OnAnimationEvent);
-        Controls = new PlayerControls();
+        Controls = InputManager.inputActions ?? new PlayerControls();
         Controls.Enable();
         Controls.Keyboard.Reload.performed += ctx =>
         {
             GunController weapon = activeWeapon.GetActiveWeapon();
-            if (weapon && weapon.ammoCount != weapon.ClipSize && weapon.WeaponSlotType.ToString() != "Axe")
-            rigController.SetTrigger("reload_weapon");
+            if (weapon != null && weapon.ammoCount != weapon.ClipSize && weapon.WeaponSlotType != ActiveWeapon.WeaponSlot.Axe && weapon.WeaponSlotType != ActiveWeapon.WeaponSlot.Knife)
+            {
+                rigController.SetTrigger("reload_weapon");
+            }
         };
     }
     private void Update()
     {
         GunController weapon = activeWeapon.GetActiveWeapon();
-        if (weapon && weapon.ammoCount <= 0 && weapon.WeaponSlotType.ToString() != "Axe" && weapon.WeaponSlotType.ToString() != "Knife")
+        if (weapon != null && weapon.ammoCount <= 0 && weapon.WeaponSlotType != ActiveWeapon.WeaponSlot.Axe && weapon.WeaponSlotType != ActiveWeapon.WeaponSlot.Knife && !rigController.GetCurrentAnimatorStateInfo(0).IsTag("Reload"))
         {
             rigController.SetTrigger("reload_weapon");
         }
@@ -59,8 +61,16 @@ public class ReloadWeapon : MonoBehaviour
     private void AttachMagazine()
     {
         GunController weapon = activeWeapon.GetActiveWeapon();
+        if (weapon == null || weapon.Magazine == null)
+        {
+            return;
+        }
+
         weapon.Magazine.SetActive(true);
-        Destroy(magazineHand);
+        if (magazineHand != null)
+        {
+            Destroy(magazineHand);
+        }
         weapon.ammoCount = weapon.ClipSize;
         rigController.ResetTrigger("reload_weapon");
         ammoWidget.Refresh(weapon.ammoCount, weapon.ClipSize, weapon.WeaponSlotType.ToString());
@@ -68,11 +78,19 @@ public class ReloadWeapon : MonoBehaviour
 
     private void Refillagazine()
     {
-        magazineHand.SetActive(true);
+        if (magazineHand != null)
+        {
+            magazineHand.SetActive(true);
+        }
     }
 
     private void DropMagazine()
     {
+        if (magazineHand == null)
+        {
+            return;
+        }
+
         GameObject droppedMagazine = Instantiate(magazineHand, magazineHand.transform.position, magazineHand.transform.rotation);
         droppedMagazine.AddComponent<Rigidbody>();
         droppedMagazine.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.Interpolate;
@@ -84,6 +102,11 @@ public class ReloadWeapon : MonoBehaviour
     private void DetachMagazine()
     {
         GunController weapon = activeWeapon.GetActiveWeapon();
+        if (weapon == null || weapon.Magazine == null || lefthand == null)
+        {
+            return;
+        }
+
         magazineHand = Instantiate(weapon.Magazine, lefthand, true);
         weapon.Magazine.SetActive(false);
     }

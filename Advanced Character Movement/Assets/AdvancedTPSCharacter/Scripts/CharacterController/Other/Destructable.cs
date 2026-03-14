@@ -9,7 +9,7 @@ public class Destructable : MonoBehaviour
     GameObject obj;
     public GameObject ReplaceObj;
     private Transform Parent;
-    private MeshRenderer renderer;
+    private MeshRenderer meshRenderer;
     public void DestroyAndReplace()
     {
         SpawnPosition = null;
@@ -17,14 +17,20 @@ public class Destructable : MonoBehaviour
         Parent = transform.parent;
         obj = Instantiate(ReplacementObject, transform.position, transform.rotation);
         StartCoroutine(Respawn(obj));
-        renderer = GetComponent<MeshRenderer>();
-        renderer.enabled = false;
+        meshRenderer = GetComponent<MeshRenderer>();
+        if (meshRenderer != null)
+        {
+            meshRenderer.enabled = false;
+        }
     }
     IEnumerator Respawn(GameObject obj)
     {
         yield return new WaitForSeconds(2.0f);
         Destroy(obj);
-        renderer = GetComponent<MeshRenderer>();
-        renderer.enabled = true;
+        meshRenderer = GetComponent<MeshRenderer>();
+        if (meshRenderer != null)
+        {
+            meshRenderer.enabled = true;
+        }
     }
 }

@@ -30,7 +30,7 @@ public class ActiveWeapon : MonoBehaviour
     bool HolsteredWeapon;
     bool WasHolstered;
     bool RemoveWeaponCurrent;
-    public TrailRenderer renderer;
+    public TrailRenderer tracerRenderer;
     public AmmoWidget ammoWidget;
     WeaponAiming aiming;
     [SerializeField] private Cinemachine.CinemachineFreeLook playerCamera;
@@ -49,7 +49,7 @@ public class ActiveWeapon : MonoBehaviour
         Controls.Keyboard.HolsterEquip.performed += ctx =>
         {
             if (GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
-            var controller = FindObjectOfType<UIController>();
+            var controller = FindFirstObjectByType<UIController>();
             if (controller.CancelAllMovement == true) { return; }
                 bool isHolstered = rigController.GetBool("Holster_Weapon");
                 HolsteredWeapon = !isHolstered;
@@ -58,7 +58,7 @@ public class ActiveWeapon : MonoBehaviour
         Controls.Keyboard.MoveThrough.performed += ctx =>
             {
                 if (GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
-                var controller = FindObjectOfType<UIController>();
+                var controller = FindFirstObjectByType<UIController>();
                 if (controller.CancelAllMovement == true) { return; }
                 int x = 0;
                 for (int i = activeWeaponIndex; i < Equipped_Weapons.Length + 1; i++)
@@ -76,7 +76,7 @@ public class ActiveWeapon : MonoBehaviour
         Controls.Keyboard.MoveBack.performed += ctx =>
             {
                 if (GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
-                var controller = FindObjectOfType<UIController>();
+                var controller = FindFirstObjectByType<UIController>();
                 if (controller.CancelAllMovement == true) { return; }
                 int x = 0;
                 for (int i = activeWeaponIndex; i > -2; i--)
@@ -94,7 +94,7 @@ public class ActiveWeapon : MonoBehaviour
         Controls.Keyboard.RemoveWeapon.performed += ctx =>
             {
                 if (GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
-                var controller = FindObjectOfType<UIController>();
+                var controller = FindFirstObjectByType<UIController>();
                 if (controller.CancelAllMovement == true) { return; }
                 RemoveWeaponCurrent = true;
             };
@@ -102,11 +102,9 @@ public class ActiveWeapon : MonoBehaviour
          {
                 if(GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
                 GetComponent<AdvancedCharacterMovement>().IsRunning = false;
-                GetComponent<AdvancedCharacterMovement>().IsCrouching = false;
-                GetComponent<AdvancedCharacterMovement>().IsWalking = false;
-                var controller = FindObjectOfType<UIController>();
+                var controller = FindFirstObjectByType<UIController>();
                 if (controller.CancelAllMovement == true) { return; }
-                if (FindObjectOfType<UIController>().CancelAllMovement == true) { return; }
+                if (FindFirstObjectByType<UIController>().CancelAllMovement == true) { return; }
                 if (currentWeapon != null && !HolsteredWeapon)
                 {
                     if (currentWeapon.WeaponSlotType.ToString() == "Axe")
@@ -146,9 +144,9 @@ public class ActiveWeapon : MonoBehaviour
         Controls.Keyboard.Shoot.canceled += ctx =>
             {
                 if (GetComponent<AdvancedCharacterMovement>().state == CharacterState.Vehicle) { return; }
-                var controller = FindObjectOfType<UIController>();
+                var controller = FindFirstObjectByType<UIController>();
                 if (controller.CancelAllMovement == true) { return; }
-                if (FindObjectOfType<UIController>().CancelAllMovement == true) { return; }
+                if (FindFirstObjectByType<UIController>().CancelAllMovement == true) { return; }
                 if (HolsteredWeapon) { return; }
                 if (currentWeapon != null)
                 {
@@ -303,7 +301,7 @@ public class ActiveWeapon : MonoBehaviour
     }
     public void Equip(GunController newWeapon, bool destroy)
     {
-        var controller = FindObjectOfType<UIController>();
+        var controller = FindFirstObjectByType<UIController>();
         if (controller.CancelAllMovement == true) { return; }
         SafeResetReloadTrigger();
         WasHolstered = HolsteredWeapon;
@@ -473,6 +471,16 @@ public class ActiveWeapon : MonoBehaviour
                 return;
             }
         }
+    }
+
+    public bool IsWeaponBusy()
+    {
+        if (currentWeapon == null)
+        {
+            return false;
+        }
+
+        return currentWeapon.isFiring || currentWeapon.AxeAttack || currentWeapon.KnifeAttacking;
     }
 
     void StartPunchAttack(float combo)

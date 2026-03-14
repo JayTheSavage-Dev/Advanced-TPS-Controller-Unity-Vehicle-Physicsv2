@@ -12,6 +12,7 @@ public class GunController : MonoBehaviour
     [SerializeField] private ParticleSystem hiteffect;
     [SerializeField] private Transform RaycastOrigin;
     [SerializeField] private Transform RaycastDestination;
+    [SerializeField] private ActiveWeapon activeWeaponSource;
     private TrailRenderer tracerEffect;
     public float Damage = 10f;
     Ray ray;
@@ -37,9 +38,21 @@ public class GunController : MonoBehaviour
     private void Start()
     {
         hitArea = GameObject.FindGameObjectWithTag("HitArea");
-        target = FindObjectOfType<CrossHairTarget>();
-        RaycastDestination = target.gameObject.transform;
-        tracerEffect = FindObjectOfType<ActiveWeapon>().renderer;
+        target = FindFirstObjectByType<CrossHairTarget>();
+        if (target != null)
+        {
+            RaycastDestination = target.gameObject.transform;
+        }
+
+        if (activeWeaponSource == null)
+        {
+            activeWeaponSource = GetComponentInParent<ActiveWeapon>();
+        }
+
+        if (activeWeaponSource != null)
+        {
+            tracerEffect = activeWeaponSource.tracerRenderer;
+        }
     }
     public void StartAxeAttack(Animator Main, Animator Rig)
     {
@@ -68,7 +81,7 @@ public class GunController : MonoBehaviour
     {
         accumalatedTime += deltaTime;
         float fireInterval = 1.0f / fireRate;
-        while(accumalatedTime >= 0.0f)
+        while (accumalatedTime >= fireInterval)
         {
             FireBullet();
             accumalatedTime -= fireInterval;
@@ -81,20 +94,51 @@ public class GunController : MonoBehaviour
             return;
         }
         ammoCount--;
-        recoil.GenerateRecoil(WeaponSlotType.ToString());
-        muzzleFlash[0].Emit(1);
-        muzzleFlash[1].Emit(1);
+        if (recoil != null)
+        {
+            recoil.GenerateRecoil(WeaponSlotType.ToString());
+        }
+
+        if (muzzleFlash != null)
+        {
+            for (int i = 0; i < muzzleFlash.Length; i++)
+            {
+                if (muzzleFlash[i] != null)
+                {
+                    muzzleFlash[i].Emit(1);
+                }
+            }
+        }
+
+        if (RaycastOrigin == null || RaycastDestination == null)
+        {
+            return;
+        }
+
         ray.origin = RaycastOrigin.position;
         ray.direction = RaycastDestination.position - RaycastOrigin.position;
-        var tracer = Instantiate(tracerEffect, ray.origin, Quaternion.identity);
-        tracer.AddPosition(ray.origin);
+
+        TrailRenderer tracer = null;
+        if (tracerEffect != null)
+        {
+            tracer = Instantiate(tracerEffect, ray.origin, Quaternion.identity);
+            tracer.AddPosition(ray.origin);
+        }
+
         if (Physics.Raycast(ray, out hitInfo, 1000f) && hitInfo.collider.tag != "Player")
         {
             Debug.Log(hitInfo.collider.gameObject.name);
-            hiteffect.transform.position = hitInfo.point;
-            hiteffect.transform.forward = hitInfo.normal;
-            hiteffect.Emit(1);
-            tracer.transform.position = hitInfo.point;
+            if (hiteffect != null)
+            {
+                hiteffect.transform.position = hitInfo.point;
+                hiteffect.transform.forward = hitInfo.normal;
+                hiteffect.Emit(1);
+            }
+
+            if (tracer != null)
+            {
+                tracer.transform.position = hitInfo.point;
+            }
             var rb2d = hitInfo.collider.GetComponent<Rigidbody>();
             if (hitInfo.collider.gameObject.GetComponent<Destructable>() != null)
             {

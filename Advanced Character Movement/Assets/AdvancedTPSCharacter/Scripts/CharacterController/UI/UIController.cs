@@ -5,7 +5,6 @@ using UnityEngine.UI;
 public class UIController : MonoBehaviour
 {
     private PlayerControls Controls;
-    private bool Entering;
     [SerializeField] public GameObject CarButton;
     [SerializeField] private GameObject RebindingUI;
     public AdvancedCharacterMovement Player;
@@ -16,13 +15,8 @@ public class UIController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Entering = false;
         Controls = new PlayerControls();
         Controls.Enable();
-        Controls.Keyboard.Equip.performed += ctx =>
-        {
-            Entering = true;
-        };
         Controls.Keyboard.Escape.performed += ctx =>
         {
             Settings = !Settings;
@@ -36,15 +30,41 @@ public class UIController : MonoBehaviour
     private void HandleOpenMenu()
     {
         if (Settings)
-        { 
-          RebindingUI.SetActive(true);
-          removecam.SetActive(false);
-          CancelAllMovement = true;
+        {
+            if (RebindingUI != null)
+            {
+                RebindingUI.SetActive(true);
+            }
+
+            if (removecam != null)
+            {
+                removecam.SetActive(false);
+            }
+
+            if (UIToolkitUIBridge.Instance != null)
+            {
+                UIToolkitUIBridge.Instance.SetSettingsVisible(true);
+            }
+
+            CancelAllMovement = true;
         }
         else
         {
-          RebindingUI.SetActive(false);
-            removecam.SetActive(true);
+            if (RebindingUI != null)
+            {
+                RebindingUI.SetActive(false);
+            }
+
+            if (removecam != null)
+            {
+                removecam.SetActive(true);
+            }
+
+            if (UIToolkitUIBridge.Instance != null)
+            {
+                UIToolkitUIBridge.Instance.SetSettingsVisible(false);
+            }
+
             CancelAllMovement = false;
         }
     }
