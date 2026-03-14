@@ -9,6 +9,7 @@ public class WeaponProceduralRecoil : MonoBehaviour
     [HideInInspector] public CM.CinemachineFreeLook playerCamera;
     [HideInInspector] public CM.CinemachineImpulseSource cameraShake;
     [HideInInspector] public Animator RigController;
+    [HideInInspector] public ReloadWeapon reloadWeapon;
     public float duration;
     public Vector2[] recoilPattern;
     float time;
@@ -16,21 +17,31 @@ public class WeaponProceduralRecoil : MonoBehaviour
     float verticalRecoil;
     float HorizontalRecoil;
     public float RecoilModifier = 1f;
+
     private void Awake()
     {
         cameraShake = GetComponent<CM.CinemachineImpulseSource>();
+        reloadWeapon = GetComponentInParent<ReloadWeapon>();
     }
+
     int NextIndex(int index)
     {
         return (index + 1) % recoilPattern.Length;
     }
+
     public void Reset()
     {
         index = 0;
     }
+
     public void GenerateRecoil(string WeaponName)
     {
         if (recoilPattern == null || recoilPattern.Length == 0)
+        {
+            return;
+        }
+
+        if (IsReloadBlockingRecoil(WeaponName))
         {
             return;
         }
@@ -64,6 +75,41 @@ public class WeaponProceduralRecoil : MonoBehaviour
             }
         }
     }
+
+    private bool IsReloadBlockingRecoil(string weaponName)
+    {
+        if (reloadWeapon != null && reloadWeapon.IsReloading)
+        {
+            return true;
+        }
+
+        if (RigController == null)
+        {
+            return false;
+        }
+
+        string reloadStateName = "Weapon_Reload_" + weaponName;
+        for (int layer = 0; layer < RigController.layerCount; layer++)
+        {
+            AnimatorStateInfo currentState = RigController.GetCurrentAnimatorStateInfo(layer);
+            if (currentState.IsTag("Reload") || currentState.IsName(reloadStateName))
+            {
+                return true;
+            }
+
+            if (RigController.IsInTransition(layer))
+            {
+                AnimatorStateInfo nextState = RigController.GetNextAnimatorStateInfo(layer);
+                if (nextState.IsTag("Reload") || nextState.IsName(reloadStateName))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     // Update is called once per frame
     void Update()
     {

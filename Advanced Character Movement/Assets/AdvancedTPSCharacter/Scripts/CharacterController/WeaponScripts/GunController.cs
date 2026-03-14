@@ -14,6 +14,7 @@ public class GunController : MonoBehaviour
     [SerializeField] private Transform RaycastDestination;
     [SerializeField] private ActiveWeapon activeWeaponSource;
     private TrailRenderer tracerEffect;
+    private ReloadWeapon reloadWeapon;
     public float Damage = 10f;
     Ray ray;
     RaycastHit hitInfo;
@@ -52,10 +53,16 @@ public class GunController : MonoBehaviour
         if (activeWeaponSource != null)
         {
             tracerEffect = activeWeaponSource.tracerRenderer;
+            reloadWeapon = activeWeaponSource.GetComponent<ReloadWeapon>();
         }
     }
     public void StartAxeAttack(Animator Main, Animator Rig)
     {
+        if (IsConstrainBlockedByReload(Rig))
+        {
+            return;
+        }
+
         AxeAttack = true;
         Main.SetBool("AttackAxe", true);
         Rig.Play("Weapon_Constrain_Axe", 1);
@@ -157,6 +164,11 @@ public class GunController : MonoBehaviour
   
     public void KnifeAttack(Animator Main, Animator Rig)
     {
+        if (IsConstrainBlockedByReload(Rig))
+        {
+            return;
+        }
+
         KnifeAttacking = true;
         Main.SetBool("AttackKnife", true);
         Rig.Play("Weapon_Constrain_Knife", 1);
@@ -169,6 +181,57 @@ public class GunController : MonoBehaviour
         Rig.SetBool("ConstrainKnife", false);
         yield return new WaitForSeconds(0.25f);
         KnifeAttacking = false;
+    }
+
+
+    private bool IsConstrainBlockedByReload(Animator rig)
+    {
+        if (activeWeaponSource == null)
+        {
+            return false;
+        }
+
+        GunController active = activeWeaponSource.GetActiveWeapon();
+        if (active == null)
+        {
+            return false;
+        }
+
+        bool firearmSlot = active.WeaponSlotType != ActiveWeapon.WeaponSlot.Axe && active.WeaponSlotType != ActiveWeapon.WeaponSlot.Knife;
+        if (!firearmSlot)
+        {
+            return false;
+        }
+
+        if (reloadWeapon != null && reloadWeapon.IsReloading)
+        {
+            return true;
+        }
+
+        if (rig == null)
+        {
+            return false;
+        }
+
+        for (int layer = 0; layer < rig.layerCount; layer++)
+        {
+            AnimatorStateInfo currentState = rig.GetCurrentAnimatorStateInfo(layer);
+            if (currentState.IsTag("Reload") || currentState.IsName("Weapon_Reload_" + active.WeaponSlotType))
+            {
+                return true;
+            }
+
+            if (rig.IsInTransition(layer))
+            {
+                AnimatorStateInfo nextState = rig.GetNextAnimatorStateInfo(layer);
+                if (nextState.IsTag("Reload") || nextState.IsName("Weapon_Reload_" + active.WeaponSlotType))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private void CalculateAxeHit()
