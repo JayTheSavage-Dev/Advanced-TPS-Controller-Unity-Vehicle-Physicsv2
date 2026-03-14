@@ -26,7 +26,7 @@ public class ConveyorBelt : MonoBehaviour
             Switch = false;
         }
         Switch = true;
-        GetComponent<Rigidbody>().velocity = speed * direction * Time.deltaTime;
+        GetComponent<Rigidbody>().linearVelocity = speed * direction * Time.deltaTime;
     }
     private void SwitchDirection()
     {

@@ -28,12 +28,39 @@ public class WeaponProceduralRecoil : MonoBehaviour
     }
     public void GenerateRecoil(string WeaponName)
     {
+        if (recoilPattern == null || recoilPattern.Length == 0)
+        {
+            return;
+        }
+
         time = duration;
-        cameraShake.GenerateImpulse(FindObjectOfType<Camera>().transform.forward);
+
+        if (cameraShake != null)
+        {
+            Camera currentCamera = FindObjectOfType<Camera>();
+            if (currentCamera != null)
+            {
+                cameraShake.GenerateImpulse(currentCamera.transform.forward);
+            }
+        }
+
         HorizontalRecoil = recoilPattern[index].x;
         verticalRecoil = recoilPattern[index].y;
         index = NextIndex(index);
-        RigController.Play("Weapon_Recoil" + WeaponName, 1, 0.0f);
+
+        if (RigController != null)
+        {
+            string stateName = "Weapon_Recoil_" + WeaponName;
+            int stateHash = Animator.StringToHash(stateName);
+            for (int layer = 0; layer < RigController.layerCount; layer++)
+            {
+                if (RigController.HasState(layer, stateHash))
+                {
+                    RigController.Play(stateHash, layer, 0.0f);
+                    break;
+                }
+            }
+        }
     }
     // Update is called once per frame
     void Update()
